@@ -343,6 +343,7 @@ class Particle{
         this.ang = this.ang + 1/30*PI*2 * direction * this.vel.mag()/3 * this.random_ang_vel;
         /*var angle1 = this.looking.heading();
         var angle2 = this.ang;
+
         var angle = angle1;
         if(this.age < 30){
             angle = angle1;
