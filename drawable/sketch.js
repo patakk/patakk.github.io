@@ -12,16 +12,30 @@ var cap = 0;
 var curves = [];
 var curve;
 
+var night = 0;
+
 var pg;
+var grid;
+
+var colors;
+var nightColors;
+var dayColors;
 
 function setup(){
     canvas = createCanvas(displayWidth, displayHeight);
     pg = createGraphics(displayWidth, displayHeight);
+    grid = createGraphics(displayWidth, displayHeight);
 
     rectMode(CENTER);
     strokeCap(SQUARE);
     pg.rectMode(CENTER);
     pg.strokeCap(SQUARE);
+
+    nightColors = [color('#202020'), color('#282828'), color('#cdcdcd')];
+    dayColors = [color('#cdcdcd'), color('#aaaaaa'), color('#202020')];
+    colors = dayColors;
+
+    drawGrid(grid);
 
     if(cap == 0){
         strokeCap(ROUND);
@@ -31,13 +45,14 @@ function setup(){
         strokeCap(ROUND);
         pg.strokeCap(SQUARE);
     }
+
+
 } 
 
 
 function draw(){
-    background(221);
     pg.clear();
-    drawGrid();
+    image(grid, 0, 0);
 
     for(var k = 0; k < curves.length; k++){
         curves[k].draw();
@@ -51,6 +66,8 @@ function draw(){
         y0 = ceil(mouseY/cellSize)*cellSize - cellSize/2;
     else
         y0 = floor(mouseY/cellSize)*cellSize + cellSize/2;
+    
+    image(pg, 0, 0);
 
     if (mouseIsPressed == true && !started) {
         started = true;
@@ -94,16 +111,15 @@ function draw(){
         curve.setEnd(x0, y0);
         started = false;
     }
-
-    image(pg, 0, 0);
 }
 
-function drawGrid(){
-    noStroke();
-    fill(196);
+function drawGrid(grid){
+    grid.background(colors[0]);
+    grid.noStroke();
+    grid.fill(colors[1]);
     for(var x = cellSize/2; x < width; x += cellSize){
         for(var y = cellSize/2; y < height; y += cellSize){
-            ellipse(x, y, 3, 3);
+            grid.ellipse(x, y, 3, 3);
         }
     }
 
@@ -126,6 +142,14 @@ function keyTyped() {
         if(curves.length == 0)
             return;
         curves.pop();
+    }
+    if (key === 'i') {
+        night = (night + 1)%2;
+        if(night == 0)
+            colors = dayColors;
+        else
+            colors = nightColors;
+        drawGrid(grid);
     }
     if (key === 'p') {
         //cellSize = min(40, (cellSize + 1));
@@ -250,7 +274,7 @@ class Curve {
 
     draw(){
         pg.noFill();
-        pg.stroke(19);
+        pg.stroke(colors[2]);
         pg.strokeWeight(th);
 
         if(this.ex == -1)

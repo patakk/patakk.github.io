@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+
+        <title>particles example</title>
+        <style>
+            body {
+                background-color: #181818;
+                padding: 0;
+                margin: 0;
+                overflow:hidden;
+                font-family: "Press Start 2P", cursive;
+            }
+
+            ul, a {
+                font-size: 13px;
+                color: #ababab;
+            }
+
+            ul {
+                position: absolute;
+                left: 22px;
+                top: 11px;
+            }
+
+            li {
+                margin: 8px 0;
+            }
+
+
+        </style>
+        <script>
+            function preventBehavior(e) {
+                e.preventDefault(); 
+            };
+
+            document.addEventListener("touchmove", preventBehavior, {passive: false});
+        </script>
+    </head>
+
+    <body>
+        <ul class="txt">
+            <li><a href="./particles">particles</a></li>
+        	<li><a href="./drawable">drawable</a></li>
+        <p>
+    </body>
+
+</html>
