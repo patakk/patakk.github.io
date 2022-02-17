@@ -1,3 +1,6 @@
 [submodule "drawable"]
 	path = drawable
 	url = git@github.com:patakk/drawable.git
+[submodule "particles"]
+	path = particles
+	url = git@github.com:patakk/particles.git
