@@ -7,7 +7,8 @@ var x0 = -1;
 var y0 = -1;
 
 var th = 7;
-var cap = 0;
+var flatCap = false;
+var hide = false;
 
 var curves = [];
 var curve;
@@ -28,16 +29,19 @@ function setup(){
 
     rectMode(CENTER);
     strokeCap(SQUARE);
+    grid.rectMode(CENTER);
+    grid.strokeCap(SQUARE);
     pg.rectMode(CENTER);
     pg.strokeCap(SQUARE);
 
     nightColors = [color('#202020'), color('#333333'), color('#cdcdcd')];
+    //nightColors = [color('#142641'), color('#334455'), color('#ffffff')];
     dayColors = [color('#cdcdcd'), color('#aaaaaa'), color('#202020')];
     colors = dayColors;
 
     drawGrid(grid);
 
-    if(cap == 0){
+    if(flatCap == false){
         strokeCap(ROUND);
         pg.strokeCap(ROUND);
     }
@@ -52,7 +56,8 @@ function setup(){
 
 function draw(){
     pg.clear();
-    image(grid, 0, 0);
+    if(!hide)
+        image(grid, 0, 0);
 
     for(var k = 0; k < curves.length; k++){
         curves[k].draw();
@@ -67,7 +72,10 @@ function draw(){
     else
         y0 = floor(mouseY/cellSize)*cellSize + cellSize/2;
     
+    if(hide)
+        background(colors[0]);
     image(pg, 0, 0);
+
 
     if (mouseIsPressed == true && !started) {
         started = true;
@@ -78,6 +86,10 @@ function draw(){
         curve.setStart(x0, y0);
     } 
     else if (mouseIsPressed == true && started) {
+    
+        if(hide)
+            return;
+
         noFill();
         stroke(255,0,0);
         strokeWeight(th);
@@ -100,7 +112,7 @@ function draw(){
             push();
             translate(xx, yy);
             rotate(aa);
-            if(cap == 0)
+            if(flatCap == false)
                 ellipse(0, 0, th, th);
             else
                 rect(0, 0, th, th);
@@ -112,7 +124,7 @@ function draw(){
         started = false;
     }
     
-    fill(255, 0, 0, 33);
+    fill(255, 0, 0, 77);
     for(var x = 0; x < width/2; x += cellSize){
         ellipse(x1 + x, y1, 5, 5);
         ellipse(x1 - x, y1, 5, 5);
@@ -128,6 +140,9 @@ function draw(){
         ellipse(x1 - x, y1 + x, 5, 5);
     }
 
+
+    if(hide)
+        return;
     noFill();
     strokeWeight(1);
     stroke(colors[1]);
@@ -163,10 +178,18 @@ function drawGrid(grid){
     grid.background(colors[0]);
     grid.noStroke();
     grid.fill(colors[1]);
+    var quant = 5;
+    var xk = 0;
     for(var x = cellSize/2; x < width; x += cellSize){
+        var yk = 0;
         for(var y = cellSize/2; y < height; y += cellSize){
-            grid.ellipse(x, y, 3, 3);
+            if(yk%quant==0 && xk%quant==0)
+                grid.ellipse(x, y, 3, 3);
+            else
+                grid.ellipse(x, y, 3, 3);
+            yk++;
         }
+        xk++;
     }
 
 }
@@ -204,20 +227,23 @@ function keyTyped() {
         //cellSize = max(15, (cellSize - 1));
     }
     if (key === 'q') {
-        cap = (cap+1)%2;
-        if(cap == 0){
-            strokeCap(ROUND);
-            pg.strokeCap(ROUND);
+        flatCap = !flatCap;
+        if(flatCap == true){
+            strokeCap(SQUARE);
+            pg.strokeCap(SQUARE);
         }
         else{
             strokeCap(ROUND);
-            pg.strokeCap(SQUARE);
+            pg.strokeCap(ROUND);
         }
     }
     if (key === 's') {
         if(curves.length == 0)
             return;
         pg.save();
+    }
+    if (key === 'h') {
+        hide = !hide;
     }
 }
 
@@ -288,6 +314,17 @@ function drawArc(x0, y0, x1, y1, diagonal, type){
     pg.vertex(x, y);
     pg.endShape();
 }
+
+/*function mouseClicked() {
+    if(mouseButton === RIGHT) {
+	    print('adding to clipboard');
+            canvas.toBlob(function(blob) { 
+    	    const item = new ClipboardItem({ "image/png": blob });
+    	    navigator.clipboard.write([item]);
+	    print('added!'); 
+	});
+    }
+}*/
 
 class Curve {
 
