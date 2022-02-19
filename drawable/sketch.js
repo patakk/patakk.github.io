@@ -6,7 +6,7 @@ var started = false;
 var x0 = -1;
 var y0 = -1;
 
-var th = 7;
+var th = 16;
 var cap = 0;
 
 var curves = [];
