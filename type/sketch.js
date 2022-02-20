@@ -5,7 +5,7 @@ var cell_size = min_dist*1.414;
 var particles = {};
 var brd = 40
 var index = 0;
-var lifespan = 500;
+var lifespan = 120;
 
 let has_gravity = false;
 let has_color = false;
@@ -285,7 +285,7 @@ function setup() {
         color += texture2D(tex, pos) * 0.29411764705882354;
         color += texture2D(tex, pos + (off1 / resolution)) * 0.35294117647058826;
         color += texture2D(tex, pos - (off1 / resolution)) * 0.35294117647058826;
-        gl_FragColor = color + 0.08*vec4(vec3((-1. + 2.*rand(pos+.01*vec2(mod(time,100.))))), 0);
+        gl_FragColor = color + 0.06*vec4(vec3((-1. + 2.*rand(pos+.01*vec2(mod(time,100.))))), 0);
         }`
     );
     shader(fx);
@@ -617,7 +617,7 @@ function createParticles() {
         //    return;
         for(var k = 0; k < 3; k++){
             idx = index++;
-            if(round(frameCount/90.)%2 == 0){
+            if(round(frameCount/90.)%2 == 0 && false){
                 var lolo = ".,:;";
                 var chrIdx = round(random(0, lolo.length-1));
                 var character = lolo[chrIdx];
