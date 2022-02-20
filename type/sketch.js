@@ -5,13 +5,17 @@ var cell_size = min_dist*1.414;
 var particles = {};
 var brd = 40
 var index = 0;
-var lifespan = 200;
+var lifespan = 500;
 
 let has_gravity = false;
 let has_color = false;
 let prev_color = false;
 let color_timer = 0.0;
 var screen_sc = 1.0;
+
+let bloom;
+
+let particlesImage;
 
 var scriptTxt;
 
@@ -237,21 +241,54 @@ function reposition_buttons(){
 
 function setup() {
     if(windowWidth > windowHeight){
-        canvas = createCanvas(780, 780);
+        canvas = createCanvas(780, 780, WEBGL);
     }
     else{
-        canvas = createCanvas(windowWidth, windowWidth);
+        canvas = createCanvas(windowWidth, windowWidth, WEBGL);
     }
     scriptTxt = scriptTxt.join('');
     print(scriptTxt);
     screen_sc = width/780;
     pallete_idx = int(random(0, pallete.length));
     reposition_canvas();
-    reposition_buttons();
+    //reposition_buttons();
     rectMode(CENTER);
+    particlesImage = createGraphics(width, height);
     createNoiseImages();
     createCursorImages();
     noCursor();
+
+    particlesImage.imageMode(CENTER);
+    let NUM_PARTICLES = 10;
+    fx = createShader(
+        `precision highp float; 
+        attribute vec3 aPosition;
+        void main() { 
+        gl_Position = vec4(aPosition, 1.0); 
+        }`, `
+        precision highp float;
+        uniform sampler2D tex;
+        uniform float time;
+
+        float rand(vec2 n) { 
+            return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+        }
+
+        void main() {
+            //float bri = 0.0;
+        //float maxBri = 0.001; // adjust depending on the number of particles
+        vec2 resolution = vec2(780, 780)*2.;
+        vec2 pos = gl_FragCoord.xy / resolution;
+        pos.y = 1. - pos.y;
+        vec4 color = vec4(0.0);
+        vec2 off1 = vec2(1.3333333333333333) * vec2(1,0);
+        color += texture2D(tex, pos) * 0.29411764705882354;
+        color += texture2D(tex, pos + (off1 / resolution)) * 0.35294117647058826;
+        color += texture2D(tex, pos - (off1 / resolution)) * 0.35294117647058826;
+        gl_FragColor = color + 0.08*vec4(vec3((-1. + 2.*rand(pos+.01*vec2(mod(time,100.))))), 0);
+        }`
+    );
+    shader(fx);
 }
 
 function windowResized(){
@@ -269,7 +306,9 @@ function windowResized(){
 
 function draw() {
     //background('#29FFBC');
-    background('#cdcdcd');
+    if(frameCount%30==0)
+        print(frameRate(), Object.keys(particles).length);
+    particlesImage.background('#cdcdcd');
     if(frameCount%100==0){
         // print(frameRate());
     }
@@ -331,20 +370,25 @@ function draw() {
     }
 
     if(mouseIsPressed && mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && mouseButton === LEFT){
-        //createParticles();
-        createScriptText();
+        createParticles();
+        //createScriptText();
         //noStroke();
         //fill('#e73900');
         //var rad = random(3,14);
         //ellipse(mouseX, mouseY, rad, rad);
     }
 
-    fill(0, 190);
-    noStroke();
+    particlesImage.fill(0, 190);
+    particlesImage.noStroke();
     if(round(frameCount/27.)%2 != 0){
-        image(cursorImgs[round(frameCount/27.)%cursorImgs.length], mouseX, mouseY+3);
-        image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
+        particlesImage.image(cursorImgs[round(frameCount/27.)%cursorImgs.length], mouseX, mouseY+3);
+        particlesImage.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
     }
+    
+    fx.setUniform('tex', particlesImage);
+    fx.setUniform('time', frameCount*1.0);
+    quad(-1, -1, 1, -1, 1, 1, -1, 1);
+    //image(particlesImage, 0, 0);
 }
 
 
@@ -403,7 +447,6 @@ class Particle{
                 }
             }
             catch(err){
-                /*print("bljhh");*/
                 continue;
             }
             try{
@@ -411,7 +454,6 @@ class Particle{
                     continue
             }
             catch(err){
-                /*console.log('xxxx', idcx, idx, particle, this.idx, local_particles)*/
             }
 
             var from_vec = p5.Vector.sub(this.pos, particle.pos);
@@ -473,7 +515,7 @@ class Particle{
 
 
         if(has_gravity){
-            this.acc.add(createVector(0, 0.2));
+            this.acc.add(createVector(0, 1));
             var up = 0;
             if(lifespan - this.age < 120){
                 up = -0.6 * (1 - (lifespan - this.age)/120);
@@ -522,16 +564,16 @@ class Particle{
         }*/
         var angle = this.ang;
 
-        push();
-        translate(this.pos.x, this.pos.y);
-        rotate(angle);
+        particlesImage.push();
+        particlesImage.translate(this.pos.x, this.pos.y);
+        particlesImage.rotate(angle);
         
         var sss = this.age;
         if(sss > lifespan-30)
             sss = map(sss, lifespan-30, lifespan, 1, 0);
         else
             sss = 1;
-        scale(sss);
+        particlesImage.scale(sss);
 
         var hexs = pallete[pallete_idx].split('-');
         var fill1 = color('#cdcdcd')
@@ -540,12 +582,12 @@ class Particle{
         var stroke1 = color(0,0,0,255);
         var stroke2 = color(0,0,0,255);
 
-        noFill();
-        stroke(50);
-        stroke(lerpColor(stroke1, stroke2, power(color_timer, 2)));
-        fill(lerpColor(fill1, fill2, power(color_timer, 2)));
+        particlesImage.noFill();
+        particlesImage.stroke(50);
+        particlesImage.stroke(lerpColor(stroke1, stroke2, power(color_timer, 2)));
+        particlesImage.fill(lerpColor(fill1, fill2, power(color_timer, 2)));
 
-        noStroke();
+        particlesImage.noStroke();
         //fill(50);
         //tint(lerpColor(fill1, fill2, power(color_timer, 2)));
         var gltx = 1;
@@ -555,14 +597,17 @@ class Particle{
         var glsx = 3;
         var glsy = 1;
 
-        image(charsImgs[this.character], 0, 0);
-        image(charsImgsFaded[this.character], glsx*gltx*(-.5+noise(this.idx)), glsy*gltx*(-.5+noise(this.idx)));
-        image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
-        image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
-        image(noiseImgs[this.noiseImgIdx], 0, 0);
+        particlesImage.fill(0);
+        particlesImage.noStroke();
+        //particlesImage.rect(0,0,1,1);
+        particlesImage.image(charsImgs[this.character], 0, 0);
+        particlesImage.image(charsImgsFaded[this.character], glsx*gltx*(-.5+noise(this.idx)), glsy*gltx*(-.5+noise(this.idx)));
+        particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
+        particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
+        particlesImage.image(noiseImgs[this.noiseImgIdx], 0, 0);
         //text("a", 0, 0);
         //rect(0, 0, scx, scy);
-        pop();
+        particlesImage.pop();
     }
 }
 
@@ -570,18 +615,18 @@ function createParticles() {
     if(true || mouseX > brd && mouseX < width-brd && mouseY > brd && mouseY < height-brd){
         //if(frameRate() < 35)
         //    return;
-        for(var k = 0; k < 1; k++){
+        for(var k = 0; k < 3; k++){
             idx = index++;
             if(round(frameCount/90.)%2 == 0){
                 var lolo = ".,:;";
                 var chrIdx = round(random(0, lolo.length-1));
                 var character = lolo[chrIdx];
-                particles[idx] = new Particle(idx, mouseX, mouseY, character);
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
             }
             else{
                 var chrIdx = round(random(0, lower.length-1));
                 var character = lower[chrIdx];
-                particles[idx] = new Particle(idx, mouseX, mouseY, character);
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
             }
         }
     }
@@ -597,7 +642,7 @@ function createScriptText() {
             if(!charset.includes(character))
                 continue;
             idx = index++;
-            particles[idx] = new Particle(idx, mouseX, mouseY, character);
+            particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
         }
     }
 }
@@ -608,7 +653,7 @@ function createCharParticle(character) {
         //    return;
         for(var k = 0; k < 1; k++){
             idx = index++;
-            particles[idx] = new Particle(idx, mouseX, mouseY, character)
+            particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character)
         }
     }
 }
