@@ -13,7 +13,7 @@ var hide = false;
 var curves = [];
 var curve;
 
-var night = 0;
+var night = 1;
 
 var pg;
 var grid;
@@ -34,10 +34,11 @@ function setup(){
     pg.rectMode(CENTER);
     pg.strokeCap(SQUARE);
 
-    nightColors = [color('#202020'), color('#333333'), color('#cdcdcd')];
+    //nightColors = [color('#202020'), color('#333333'), color('#cdcdcd')];
+    nightColors = [color('#142641'), color('#333333'), color('#cee741')];
     //nightColors = [color('#142641'), color('#334455'), color('#ffffff')];
     dayColors = [color('#cdcdcd'), color('#aaaaaa'), color('#202020')];
-    colors = dayColors;
+    colors = nightColors;
 
     drawGrid(grid);
 
