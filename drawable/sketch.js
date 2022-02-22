@@ -35,7 +35,7 @@ function setup(){
     pg.strokeCap(SQUARE);
 
     //nightColors = [color('#202020'), color('#333333'), color('#cdcdcd')];
-    nightColors = [color('#142641'), color('#333333'), color('#cee741')];
+    nightColors = [color('#142641'), color('#333333'), color('#dfff00')];
     //nightColors = [color('#142641'), color('#334455'), color('#ffffff')];
     dayColors = [color('#cdcdcd'), color('#aaaaaa'), color('#202020')];
     colors = nightColors;
