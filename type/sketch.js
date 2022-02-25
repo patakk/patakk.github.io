@@ -306,8 +306,6 @@ function windowResized(){
 
 function draw() {
     //background('#29FFBC');
-    if(frameCount%30==0)
-        print(frameRate(), Object.keys(particles).length);
     particlesImage.background('#cdcdcd');
     if(frameCount%100==0){
         // print(frameRate());
