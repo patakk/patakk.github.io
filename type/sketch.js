@@ -5,13 +5,16 @@ var cell_size = min_dist*1.414;
 var particles = {};
 var brd = 40
 var index = 0;
-var lifespan = 120;
+var lifespan = 555;
 
 let has_gravity = false;
 let has_color = false;
 let prev_color = false;
 let color_timer = 0.0;
 var screen_sc = 1.0;
+
+var mx = 0;
+var my = 0;
 
 let bloom;
 
@@ -31,7 +34,10 @@ var pallete = [
 let courierM;
 function preload() {
     courierM = loadFont('assets/CourierM_Bold.ttf');
-    scriptTxt = loadStrings('assets/sketch.txt');
+    //scriptTxt = loadStrings('assets/silmarillion.txt');
+    scriptTxt = loadStrings('assets/lotr.txt');
+    //scriptTxt = loadStrings('assets/quando.txt');
+    //scriptTxt = loadStrings('assets/harrypotter.txt');
 }
 
 var img_a;
@@ -39,12 +45,18 @@ var charsImgs = {};
 var charsImgsFaded = {};
 var noiseImgs = [];
 var cursorImgs = [];
-var special = "!?_.,:;/$%&#'\"+-=*@<>()[]{}";
-var upper = "ABCDEFGHIJKLMNOPQRSUVWXYZ";
-var lower = "abcdefghijklmnopqrstuvwxyz";
+var special = " !?_.,:;/$%&#'\"+-=*@<>()[]{}";
+var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+var lower = "abcdefghijklmnopqrstuúvwxyz";
 var numerical = "0123456789";
-var charset = upper + lower + numerical + special;
-var scriptChrIdx = 0;
+var charset = upper + lower + numerical + special + '\n';
+var scriptChrIdx = -1;
+
+
+var charnx = 31;
+var charny = 17;
+var charbrdx = 6;
+var charbrdy = 6;
 
 function createCursorImages(){
     for(var ww = 0; ww < 10; ww++){
@@ -63,11 +75,11 @@ function createCursorImages(){
             cursorImg.rect(0, 0+3-13/2, 7, 2);
             cursorImg.push();
             //cursorImg.tint(255, 122);
-            //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
+            //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mx, my+3);
             cursorImg.pop();
         }
         cursorImg.filter(BLUR, 2);
-        //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
+        //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mx, my+3);
         for(var k = 0; k < 1; k++){
             var rr = random(1,2);
             cursorImg.fill(0, random(133, 136));
@@ -76,13 +88,13 @@ function createCursorImages(){
             cursorImg.rect(0, 0+3-13/2, 7, 2, 1);
             cursorImg.push();
             //cursorImg.tint(255, 122);
-            //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
+            //cursorImg.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mx, my+3);
             cursorImg.pop();
         }
         cursorImg.pop();
         cursorImgs.push(cursorImg);
     }
-    print(cursorImgs)
+    //print(cursorImgs)
 }
 
 function createNoiseImages(){
@@ -95,7 +107,7 @@ function createNoiseImages(){
         var ngrains = random(40);
         for(var k = 0; k < ngrains; k++){
             var rr = random(1,1.1);
-            noiseImg.fill(0, random(0, 111));
+            noiseImg.fill(0, random(0, 77));
             //noiseImg.fill(0, 255);
             noiseImg.ellipse(3*random(-1,1,1,1), 2+4*random(-1,1,1,1), rr, rr);
         }
@@ -115,7 +127,7 @@ function createCharImage(chr){
     //chrImg.rect(0, 0, chrImg.width, chrImg.height);
     chrImg.noStroke();
     chrImg.translate(chrImg.width/2, chrImg.height/2);
-    chrImg.fill(0, 180);
+    chrImg.fill(0, 111);
     chrImg.noStroke();
     chrImg.textAlign(CENTER, CENTER);
     chrImg.text(chr, 0, 0);
@@ -133,14 +145,14 @@ function createCharImageFaded(chr){
     //chrImg.fill(0, 10);
     //chrImg.stroke(0, 90);
     //chrImg.rect(0, 0, chrImg.width, chrImg.height);
-    chrImg.fill(0, 77);
+    chrImg.fill(0, 222);
     chrImg.noStroke();
     chrImg.translate(chrImg.width/2, chrImg.height/2);
     chrImg.textAlign(CENTER, CENTER);
     chrImg.text(chr, 0, 0);
     chrImg.pop();
     if(random(100) < 110)
-        chrImg.filter(BLUR, random(1,2));
+        chrImg.filter(BLUR, random(1., 2));
 
     return chrImg;
 }
@@ -152,7 +164,7 @@ function reposition_canvas(){
 
     grid = []
 
-    min_dist = 10 * screen_sc;
+    min_dist = 5 * screen_sc;
     cell_size = min_dist*1.414;
 
     for(var y=0; y<height/min_dist; y++){
@@ -184,7 +196,7 @@ function reposition_canvas(){
         charsImgs[chr] = createCharImage(chr);
         charsImgsFaded[chr] = createCharImageFaded(chr);
     }
-    print(charsImgs);
+    //print(charsImgs);
 }
 
 function reposition_buttons(){
@@ -246,8 +258,7 @@ function setup() {
     else{
         canvas = createCanvas(windowWidth, windowWidth, WEBGL);
     }
-    scriptTxt = scriptTxt.join('');
-    print(scriptTxt);
+    scriptTxt = scriptTxt.join('\n');
     screen_sc = width/780;
     pallete_idx = int(random(0, pallete.length));
     reposition_canvas();
@@ -269,15 +280,16 @@ function setup() {
         precision highp float;
         uniform sampler2D tex;
         uniform float time;
+        uniform vec2 res;
 
         float rand(vec2 n) { 
-            return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+            return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 143758.5453);
         }
 
         void main() {
             //float bri = 0.0;
         //float maxBri = 0.001; // adjust depending on the number of particles
-        vec2 resolution = vec2(780, 780)*2.;
+        vec2 resolution = res*2.;
         vec2 pos = gl_FragCoord.xy / resolution;
         pos.y = 1. - pos.y;
         vec4 color = vec4(0.0);
@@ -285,14 +297,16 @@ function setup() {
         color += texture2D(tex, pos) * 0.29411764705882354;
         color += texture2D(tex, pos + (off1 / resolution)) * 0.35294117647058826;
         color += texture2D(tex, pos - (off1 / resolution)) * 0.35294117647058826;
-        gl_FragColor = color + 0.06*vec4(vec3((-1. + 2.*rand(pos+.01*vec2(mod(time,100.))))), 0);
+        color = color + 0.06*vec4(vec3((-1. + 2.*rand(pos+.1*vec2(mod(time,100.))))), 0);
+        //color.a *= -1.;
+        //gl_FragColor = vec4(1.,1.,1.,0.) - color;
+        gl_FragColor = color;
         }`
     );
     shader(fx);
 }
 
 function windowResized(){
-        print('hmm')
     if(windowWidth > windowHeight){
         resizeCanvas(780, 780);
     }
@@ -302,9 +316,16 @@ function windowResized(){
     screen_sc = width/780;
     reposition_canvas();
     reposition_buttons();
+    shader(fx);
 }
 
 function draw() {
+    mx = mx + (mouseX - mx)*0.1;
+    my = my + (mouseY - my)*0.1;
+
+    //if(frameCount % 100==0)
+    //    print(frameRate());
+    blendMode(MULTIPLY);
     //background('#29FFBC');
     particlesImage.background('#cdcdcd');
     if(frameCount%100==0){
@@ -367,39 +388,194 @@ function draw() {
         color_timer = max(0, min(1, color_timer));
     }
 
-    if(mouseIsPressed && mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && mouseButton === LEFT){
-        createParticles();
-        //createScriptText();
+    if(mouseIsPressed && mx > 0 && mx < width && my > 0 && my < height && mouseButton === LEFT && frameCount%5==0){
+        //createParticles();
+        createScriptText(true);
         //noStroke();
         //fill('#e73900');
         //var rad = random(3,14);
-        //ellipse(mouseX, mouseY, rad, rad);
+        //ellipse(mx, my, rad, rad);
     }
 
     particlesImage.fill(0, 190);
     particlesImage.noStroke();
-    if(round(frameCount/27.)%2 != 0){
-        particlesImage.image(cursorImgs[round(frameCount/27.)%cursorImgs.length], mouseX, mouseY+3);
-        particlesImage.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mouseX, mouseY+3);
+    if(round(frameCount/27.)%2 != 0 || true){
+        particlesImage.image(cursorImgs[round(frameCount/27.)%cursorImgs.length], mx, my+3);
+        particlesImage.image(noiseImgs[round(frameCount/27.)%noiseImgs.length], mx, my+3);
     }
     
     fx.setUniform('tex', particlesImage);
     fx.setUniform('time', frameCount*1.0);
-    quad(-1, -1, 1, -1, 1, 1, -1, 1);
+    fx.setUniform('res', [780, 780]);
+    //translate(width/2, height/2);
+    /*
+    var dd = dist(mouseX, mouseY, pmouseX, pmouseY);
+    var det = dd/2.5;
+    
+    for(var pp = 0; pp < 1.0; pp+=1.0/det){
+        var mx = lerp(pmouseX, mouseX, pp);
+        var my = lerp(pmouseY, mouseY, pp);
+        var qqx = 0.4;
+        var qqy = 0.15;
+        var x1 = map(mx, 0, width, -1, 1) - qqx;
+        var y1 = map(my, 0, height, +1, -1) - qqy;
+        var x2 = map(mx, 0, width, -1, 1) + qqx;
+        var y2 = map(my, 0, height, +1, -1) - qqy;
+        var x3 = map(mx, 0, width, -1, 1) + qqx;
+        var y3 = map(my, 0, height, +1, -1) + qqy;
+        var x4 = map(mx, 0, width, -1, 1) - qqx;
+        var y4 = map(my, 0, height, +1, -1) + qqy;
+        //quad(-1, -1, 1, -1, 1, 1, -1, 1);
+        //if(mouseIsPressed)
+            //quad(x1, y1, x2, y2, x3, y3, x4, y4);
+    }
+    stroke(255,0,0);
+    texture(particlesImage);
+    beginShape();
+    vertex(mouseX-100-width/2, mouseY-100-height/2, 0, 0);
+    vertex(mouseX+100-width/2, mouseY-100-height/2, 1, 0);
+    vertex(mouseX+100-width/2, mouseY+100-height/2, 1, 1);
+    vertex(mouseX-100-width/2, mouseY+100-height/2, 0, 1);
+    endShape();*/
+
     //image(particlesImage, 0, 0);
+    quad(-1, -1, 1, -1, 1, 1, -1, 1);
 }
 
 
 function keyTyped() {
-    if(!charset.includes(key))
-        return;
-    createCharParticle(key);
+    if(charset.includes(key) || keyCode == RETURN){
+        var kkey = key;
+        if(keyCode == RETURN)
+            kkey = '\n';
+        createCharParticle(kkey);
+    }
+}
+
+function mouseClicked(){
+    if(mx > 0 && mx < width && my > 0 && my < height){
+        //createParticles();
+        //createScriptText();
+        //finishWord();
+        //finishWord();
+        //noStroke();
+        //fill('#e73900');
+        //var rad = random(3,14);
+        //ellipse(mx, my, rad, rad);
+    }
+}
+
+function keyPressed(){
+    /*if(keyCode == 65){
+        var co = 0;
+        for(var y=0; y<height/min_dist; y++){
+            for(var x=0; x<width/min_dist; x++){
+                if(dead[p] in grid[y][x])
+                    co += grid[y][x].length;
+            }
+        }
+        print(co);
+    }*/
+    if(!charset.includes(key) && keyCode != RETURN && keyCode != SHIFT){
+        createScriptText(false);
+        finishWord();
+    }
+    
+}
+
+function mouseReleased(){
+    finishWord();
+}
+
+function finishWord(){
+
+    var needed = buff;
+    if(needed == -1){
+        needed = 0;
+        var chc;
+        while(chc != ' ' && chc != '\n'){
+            chc = scriptTxt[scriptChrIdx + needed+1];
+            //print(chc)
+            needed++;
+            if(needed > 100)
+                return;
+        }
+    }
+    //print(needed);
+    for(var k = 0; k < needed; k++){
+        //scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
+        //var character = scriptTxt[scriptChrIdx];
+        //var idx = index++;
+        //particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
+
+        scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
+
+        var character = scriptTxt[scriptChrIdx];
+        var kk = 1;
+        var chc = character;
+        while(chc != ' ' && chc != '\n'){
+            chc = scriptTxt[scriptChrIdx + kk];
+            kk++;
+            if(kk > 100){
+                print('>>>>>>>>>', kk)
+                return;
+            }
+        }
+        if(index%charnx+kk >= charnx){
+            var zff = kk - (index%charnx+kk)%charnx;
+            for(var k = 0; k < zff; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+
+            var randIndent = 1*round(random(0, 6));
+            for(var k = 0; k < randIndent; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+            //scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
+        }
+
+        character = scriptTxt[scriptChrIdx];
+        //print(character)
+        if(character == '\n'){
+            var sfill = charnx - index%charnx - 1;
+            print(sfill);
+            for(var k = 0; k < sfill; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ')
+            }
+            var randIndent = 1*round(random(0, 6));
+            for(var k = 0; k < randIndent; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+        }
+        
+
+        //print('--', character)
+        if(!charset.includes(character)){
+            print('>>>>>>>>>', character)
+            return;
+        }
+        var idx = index++;
+        particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
+    }
 }
 
 class Particle{
     constructor(idx, x, y, character) {
+        //if(character == ' ' || character == '\n')
+        //    character = '_';
         /*x = max(0, min(width, x));
         y = max(0, min(height, y));*/
+
+        var dx = round((width-2*charbrdx*brd)/charnx);
+        var dy = round((height-2*charbrdy*brd)/charny);
+        var iddx = idx%(charnx*charny-0)+0;
+        var targetx = ((iddx)%charnx)*dx + charbrdx*brd; 
+        var targety = floor((iddx)/charnx)*dy + charbrdy*brd; 
+        this.target = createVector(targetx, targety);
         this.idx = idx
         this.vel = createVector(-15, 0);
         this.pos = createVector(x+random(-3,3), y+random(-3,3))
@@ -436,6 +612,7 @@ class Particle{
         }
         /*console.log(this.idx)*/
 
+        // REPULSION
         for(var idcx in local_particles){
             var idx = local_particles[idcx];
             var particle = particles[idx];
@@ -474,8 +651,12 @@ class Particle{
         }
 
         this.acc = createVector(0, 0);
-        this.acc.add(vec_from.mult(1));
+        if(this.age < 30)
+            this.acc.add(vec_from.mult(1));
+        else
+            this.acc.add(vec_from.mult(.06));
 
+        // BORDERS
         if(this.pos.x < brd){
             var fac = 1 - this.pos.x / brd;
             if(fac > 0.5)
@@ -512,6 +693,7 @@ class Particle{
         }
 
 
+        // GRAVITY
         if(has_gravity){
             this.acc.add(createVector(0, 1));
             var up = 0;
@@ -520,6 +702,27 @@ class Particle{
             }
             this.acc.add(createVector(0, up));
         }
+
+        // TO TARGET
+        var toTarget = p5.Vector.sub(this.target, this.pos);
+        if(toTarget.mag() > 19){
+            toTarget.normalize();
+            toTarget.mult(.85 + (31.314*noise(this.idx*1000))%.5);
+            toTarget.mult(.49);
+            this.acc.add(toTarget);
+        }
+        else if(toTarget.mag() > 11){
+            toTarget.normalize();
+            toTarget.mult(.5);
+            this.acc.add(toTarget);
+        }
+        else if(toTarget.mag() > 2){
+            toTarget.normalize();
+            toTarget.mult(.25);
+            this.acc.add(toTarget);
+        }
+
+        // vel + add, pos + vel
 
         this.vel.add(this.acc);
 
@@ -546,6 +749,12 @@ class Particle{
         //this.looking = this.looking.add(this.vel.sub(this.looking).mult(0.011));
 
         this.ang = this.ang + 1/30*PI*2 * direction * this.vel.mag()/3 * this.random_ang_vel;
+
+        
+        var toTarget = p5.Vector.sub(this.target, this.pos);
+        if(toTarget.mag() < 25){
+            this.ang = 0.95*this.ang;
+        }
         /*var angle1 = this.looking.heading();
         var angle2 = this.ang;
 
@@ -561,16 +770,22 @@ class Particle{
             angle = angle2;
         }*/
         var angle = this.ang;
+        var sss = this.age;
+        var lift = 0;
+        if(sss > lifespan-30){
+            lift = map(sss, lifespan-30, lifespan, 0, 1);
+            lift = lift*(10 + 10*((noise(this.idx*3101.31)*100)%1.0));
+            sss = map(sss, lifespan-30, lifespan, 1, 0);
+        }
+        else{
+            lift = 0;
+            sss = 1;
+        }
 
         particlesImage.push();
-        particlesImage.translate(this.pos.x, this.pos.y);
+        particlesImage.translate(this.pos.x, this.pos.y - lift);
         particlesImage.rotate(angle);
         
-        var sss = this.age;
-        if(sss > lifespan-30)
-            sss = map(sss, lifespan-30, lifespan, 1, 0);
-        else
-            sss = 1;
         particlesImage.scale(sss);
 
         var hexs = pallete[pallete_idx].split('-');
@@ -599,59 +814,125 @@ class Particle{
         particlesImage.noStroke();
         //particlesImage.rect(0,0,1,1);
         particlesImage.image(charsImgs[this.character], 0, 0);
-        particlesImage.image(charsImgsFaded[this.character], glsx*gltx*(-.5+noise(this.idx)), glsy*gltx*(-.5+noise(this.idx)));
-        particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
-        particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
-        particlesImage.image(noiseImgs[this.noiseImgIdx], 0, 0);
+        //particlesImage.image(charsImgsFaded[this.character], glsx*gltx*(-.5+noise(this.idx)), glsy*gltx*(-.5+noise(this.idx)));
+        //particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
+        particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx))+1, glsy*(-.5+noise(this.idx)));
+        if(!' .,_\'\n'.includes(this.character))
+            particlesImage.image(noiseImgs[this.noiseImgIdx], 0, 0);
         //text("a", 0, 0);
         //rect(0, 0, scx, scy);
         particlesImage.pop();
+
+        //particlesImage.ellipse(this.target.x, this.target.y, 3, 3);
+        //particlesImage.noFill();
+        //particlesImage.stroke(0);
     }
 }
 
 function createParticles() {
-    if(true || mouseX > brd && mouseX < width-brd && mouseY > brd && mouseY < height-brd){
+    if(true || mx > brd && mx < width-brd && my > brd && my < height-brd){
         //if(frameRate() < 35)
         //    return;
         for(var k = 0; k < 3; k++){
-            idx = index++;
+            var idx = index++;
             if(round(frameCount/90.)%2 == 0 && false){
                 var lolo = ".,:;";
                 var chrIdx = round(random(0, lolo.length-1));
                 var character = lolo[chrIdx];
-                particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
             }
             else{
                 var chrIdx = round(random(0, lower.length-1));
                 var character = lower[chrIdx];
-                particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
             }
         }
     }
 }
 
-function createScriptText() {
-    if(true || mouseX > brd && mouseX < width-brd && mouseY > brd && mouseY < height-brd){
+var buff = -1;
+
+function createScriptText(rewind) {
+    if(true || mx > brd && mx < width-brd && my > brd && my < height-brd){
         //if(frameRate() < 35)
         //    return;
-        for(var k = 0; k < 1; k++){
-            scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
-            var character = scriptTxt[scriptChrIdx];
-            if(!charset.includes(character))
-                continue;
-            idx = index++;
-            particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character);
+
+        scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
+
+        var character;
+        var kk = 1;
+        var chc = character;
+        buff = 0;
+        while(chc != ' ' && chc != '\n'){
+            chc = scriptTxt[scriptChrIdx + kk];
+            kk++;
+            if(kk > 100)
+                return;
+            buff++;
         }
+        if(index%charnx+kk >= charnx){
+            var zff = kk - (index%charnx+kk)%charnx;
+            for(var k = 0; k < zff; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+
+            var randIndent = 1*round(random(0, 6));
+            for(var k = 0; k < randIndent; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+            if(rewind && scriptTxt[scriptChrIdx] == ' ')
+                scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
+        }
+
+        character = scriptTxt[scriptChrIdx];
+
+        //print(character)
+        if(character == '\n'){
+            var sfill = charnx - index%charnx - 1;
+            //print(sfill);
+            for(var k = 0; k < sfill; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ')
+            }
+            var randIndent = 1*round(random(0, 6));
+            for(var k = 0; k < randIndent; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+        }
+
+        if(!charset.includes(character))
+            return;
+        var idx = index++;
+        //print('__', character)
+        particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
     }
 }
 
 function createCharParticle(character) {
-    if(true || mouseX > brd && mouseX < width-brd && mouseY > brd && mouseY < height-brd){
+    if(true || mx > brd && mx < width-brd && my > brd && my < height-brd){
         //if(frameRate() < 35)
         //    return;
-        for(var k = 0; k < 1; k++){
-            idx = index++;
-            particles[idx] = new Particle(idx, max(brd, min(width-brd, mouseX)), max(brd, min(height-brd, mouseY)), character)
+        if(character == '\n'){
+            var sfill = charnx - index%charnx - 1;
+            //print(sfill);
+            for(var k = 0; k < sfill; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ')
+            }
+            var randIndent = 1*round(random(0, 6));
+            for(var k = 0; k < randIndent; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
+            }
+        }
+        else{
+            for(var k = 0; k < 1; k++){
+                var idx = index++;
+                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character)
+            }
         }
     }
 }
@@ -661,17 +942,4 @@ function power(p, g) {
         return 0.5 * pow(2*p, g);
     else
         return 1 - 0.5 * pow(2*(1 - p), g);
-}
-
-function keyPressed(){
-    /*if(keyCode == 65){
-        var co = 0;
-        for(var y=0; y<height/min_dist; y++){
-            for(var x=0; x<width/min_dist; x++){
-                if(dead[p] in grid[y][x])
-                    co += grid[y][x].length;
-            }
-        }
-        print(co);
-    }*/
 }
