@@ -258,8 +258,8 @@ function windowResized(){
 }
 
 function draw() {
-    mx = mx + (mouseX - mx)*0.1;
-    my = my + (mouseY - my)*0.1;
+    mx = mx + (mouseX - mx)*0.25;
+    my = my + (mouseY - my)*0.25;
 
     //if(frameCount % 100==0)
     //    print(frameRate());
@@ -269,14 +269,6 @@ function draw() {
     if(frameCount%100==0){
         // print(frameRate());
     }
-    // for(var y = 0; y < height; y+=cell_size){
-    //     stroke('#ff0000');
-    //     line(0, y, width, y)
-    // }
-    // for(var x = 0; x < width; x+=cell_size){
-    //     stroke('#ff0000');
-    //     line(x, 0, x, height)
-    // }
 
     var dead = [];
     for(var p in particles){
@@ -327,38 +319,7 @@ function draw() {
     fx.setUniform('tex', particlesImage);
     fx.setUniform('time', frameCount*1.0);
     fx.setUniform('res', [780, 780]);
-    //translate(width/2, height/2);
-    /*
-    var dd = dist(mouseX, mouseY, pmouseX, pmouseY);
-    var det = dd/2.5;
     
-    for(var pp = 0; pp < 1.0; pp+=1.0/det){
-        var mx = lerp(pmouseX, mouseX, pp);
-        var my = lerp(pmouseY, mouseY, pp);
-        var qqx = 0.4;
-        var qqy = 0.15;
-        var x1 = map(mx, 0, width, -1, 1) - qqx;
-        var y1 = map(my, 0, height, +1, -1) - qqy;
-        var x2 = map(mx, 0, width, -1, 1) + qqx;
-        var y2 = map(my, 0, height, +1, -1) - qqy;
-        var x3 = map(mx, 0, width, -1, 1) + qqx;
-        var y3 = map(my, 0, height, +1, -1) + qqy;
-        var x4 = map(mx, 0, width, -1, 1) - qqx;
-        var y4 = map(my, 0, height, +1, -1) + qqy;
-        //quad(-1, -1, 1, -1, 1, 1, -1, 1);
-        //if(mouseIsPressed)
-            //quad(x1, y1, x2, y2, x3, y3, x4, y4);
-    }
-    stroke(255,0,0);
-    texture(particlesImage);
-    beginShape();
-    vertex(mouseX-100-width/2, mouseY-100-height/2, 0, 0);
-    vertex(mouseX+100-width/2, mouseY-100-height/2, 1, 0);
-    vertex(mouseX+100-width/2, mouseY+100-height/2, 1, 1);
-    vertex(mouseX-100-width/2, mouseY+100-height/2, 0, 1);
-    endShape();*/
-
-    //image(particlesImage, 0, 0);
     quad(-1, -1, 1, -1, 1, 1, -1, 1);
 }
 
