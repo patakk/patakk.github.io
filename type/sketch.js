@@ -22,15 +22,6 @@ let particlesImage;
 
 var scriptTxt;
 
-var pallete_idx = 0;
-var pallete = [
-    'ee6055-60d394-aaf683-ffd97d-ff9b85',
-    '5bc0eb-fde74c-9bc53d-e55934-fa7921',
-    'c200fb-ec0868-fc2f00-ec7d10-ffbc0a',
-    'f9c80e-f86624-ea3546-662e9b-43bccd',
-    '471ca8-884ab2-ff930a-f24b04-d1105a',
-]
-
 let courierM;
 function preload() {
     courierM = loadFont('assets/CourierM_Bold.ttf');
@@ -199,58 +190,6 @@ function reposition_canvas(){
     //print(charsImgs);
 }
 
-function reposition_buttons(){
-    toggle_button = select('#toggle');
-    color_button = select('#color');
-    toggle_button.style('opacity', 0.5)
-    color_button.style('opacity', 0.5)
-
-    var x, y;
-    if(windowWidth > windowHeight){
-        x = (windowWidth + width) / 2;
-        y = (windowHeight - height) / 2;
-        toggle_button.position(x, y);
-        x = (windowWidth + width) / 2;
-        y = (windowHeight + height) / 2 - color_button.height;
-        color_button.position(x, y);
-    }
-    else{
-        x = (windowWidth - width) / 2;
-        y = (windowHeight + height) / 2;
-        toggle_button.position(x, y);
-        x = (windowWidth + width) / 2 - color_button.width;
-        y = (windowHeight + height) / 2;
-        color_button.position(x, y);
-    }
-
-    toggle_button.mouseClicked(function (){
-        if(has_gravity == true){
-            // toggle_button.style('color', '#CFA343');
-            toggle_button.style('opacity', 0.5);
-            // toggle_button.html('gravity off', false);
-        }
-        else{
-            // toggle_button.style('color', '#71507A');
-            toggle_button.style('opacity', 1.0);
-            // toggle_button.html('gravity on&nbsp;', false);
-        }
-        has_gravity = !has_gravity;
-    });
-    color_button.mouseClicked(function (){
-        if(has_color == true){
-            // color_button.style('color', '#CFA343');
-            color_button.style('opacity', 0.5);
-            // color_button.html('color off', false);
-        }
-        else{
-            // color_button.style('color', '#71507A');
-            color_button.style('opacity', 1.0);
-            // color_button.html('color on&nbsp;', false);
-        }
-        has_color = !has_color;
-    });
-}
-
 function setup() {
     if(windowWidth > windowHeight){
         canvas = createCanvas(780, 780, WEBGL);
@@ -260,7 +199,6 @@ function setup() {
     }
     scriptTxt = scriptTxt.join('\n');
     screen_sc = width/780;
-    pallete_idx = int(random(0, pallete.length));
     reposition_canvas();
     //reposition_buttons();
     rectMode(CENTER);
@@ -368,24 +306,6 @@ function draw() {
                 }
             }
         }
-    }
-
-    if(has_color){
-        if(prev_color == false){
-            color_timer = 0;
-            pallete_idx = (pallete_idx + 1) % pallete.length;
-        }
-        prev_color = true;
-        color_timer += 1.0/30;
-        color_timer = max(0, min(1, color_timer));
-    }
-    else{
-        if(prev_color == true){
-            color_timer = 1;
-        }
-        prev_color = false;
-        color_timer -= 1.0/30;
-        color_timer = max(0, min(1, color_timer));
     }
 
     if(mouseIsPressed && mx > 0 && mx < width && my > 0 && my < height && mouseButton === LEFT && frameCount%3==0){
@@ -740,10 +660,7 @@ class Particle{
         var aag = this.age;
         if(aag > lifespan-30)
             aag = lifespan-aag;
-        var scx = (10*screen_sc * min(aag, 30)/30 + power(color_timer, 2)) * this.sca;
-        var scy = (4*screen_sc * min(aag, 30)/30 + power(color_timer, 2)) * this.sca;
         var direction = ((this.idx % 2) * 2) - 1;
-        var velocity = (this.idx % 20) / 20;
 
         this.looking = p5.Vector.add(this.looking, p5.Vector.mult(p5.Vector.sub(this.vel, this.looking), 0.1));
         //this.looking = this.looking.add(this.vel.sub(this.looking).mult(0.011));
@@ -755,20 +672,7 @@ class Particle{
         if(toTarget.mag() < 25){
             this.ang = 0.95*this.ang;
         }
-        /*var angle1 = this.looking.heading();
-        var angle2 = this.ang;
 
-        var angle = angle1;
-        if(this.age < 30){
-            angle = angle1;
-        }
-        else if(this.age < 120){
-            var p = (this.age-30)/90;
-            angle = (1-p)*angle1 + angle2*p;
-        }
-        else{
-            angle = angle2;
-        }*/
         var angle = this.ang;
         var sss = this.age;
         var lift = 0;
@@ -785,24 +689,8 @@ class Particle{
         particlesImage.push();
         particlesImage.translate(this.pos.x, this.pos.y - lift);
         particlesImage.rotate(angle);
-        
         particlesImage.scale(sss);
 
-        var hexs = pallete[pallete_idx].split('-');
-        var fill1 = color('#cdcdcd')
-        var fill2 = color('#'+hexs[this.idx%hexs.length])
-
-        var stroke1 = color(0,0,0,255);
-        var stroke2 = color(0,0,0,255);
-
-        particlesImage.noFill();
-        particlesImage.stroke(50);
-        particlesImage.stroke(lerpColor(stroke1, stroke2, power(color_timer, 2)));
-        particlesImage.fill(lerpColor(fill1, fill2, power(color_timer, 2)));
-
-        particlesImage.noStroke();
-        //fill(50);
-        //tint(lerpColor(fill1, fill2, power(color_timer, 2)));
         var gltx = 1;
         if(noise(this.idx) > 0.8)
             gltx = 2;
@@ -810,22 +698,14 @@ class Particle{
         var glsx = 3;
         var glsy = 1;
 
-        particlesImage.fill(0);
-        particlesImage.noStroke();
-        //particlesImage.rect(0,0,1,1);
         particlesImage.image(charsImgs[this.character], 0, 0);
         //particlesImage.image(charsImgsFaded[this.character], glsx*gltx*(-.5+noise(this.idx)), glsy*gltx*(-.5+noise(this.idx)));
         //particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx)), glsy*(-.5+noise(this.idx)));
         particlesImage.image(charsImgsFaded[this.character], glsx*(-.5+noise(this.idx))+1, glsy*(-.5+noise(this.idx)));
         if(!' .,_\'\n'.includes(this.character))
             particlesImage.image(noiseImgs[this.noiseImgIdx], 0, 0);
-        //text("a", 0, 0);
-        //rect(0, 0, scx, scy);
         particlesImage.pop();
 
-        //particlesImage.ellipse(this.target.x, this.target.y, 3, 3);
-        //particlesImage.noFill();
-        //particlesImage.stroke(0);
     }
 }
 
@@ -835,17 +715,9 @@ function createParticles() {
         //    return;
         for(var k = 0; k < 3; k++){
             var idx = index++;
-            if(round(frameCount/90.)%2 == 0 && false){
-                var lolo = ".,:;";
-                var chrIdx = round(random(0, lolo.length-1));
-                var character = lolo[chrIdx];
-                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
-            }
-            else{
-                var chrIdx = round(random(0, lower.length-1));
-                var character = lower[chrIdx];
-                particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
-            }
+            var chrIdx = round(random(0, lower.length-1));
+            var character = lower[chrIdx];
+            particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), character);
         }
     }
 }
@@ -854,9 +726,6 @@ var buff = -1;
 
 function createScriptText(rewind) {
     if(true || mx > brd && mx < width-brd && my > brd && my < height-brd){
-        //if(frameRate() < 35)
-        //    return;
-
         scriptChrIdx = (scriptChrIdx+1)%scriptTxt.length;
 
         var character;
@@ -926,7 +795,7 @@ function createCharParticle(character) {
             for(var k = 0; k < randIndent; k++){
                 var idx = index++;
                 particles[idx] = new Particle(idx, max(brd, min(width-brd, mx)), max(brd, min(height-brd, my)), ' ');
-            }
+            }   
         }
         else{
             for(var k = 0; k < 1; k++){
