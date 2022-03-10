@@ -388,7 +388,7 @@ function draw() {
         color_timer = max(0, min(1, color_timer));
     }
 
-    if(mouseIsPressed && mx > 0 && mx < width && my > 0 && my < height && mouseButton === LEFT && frameCount%5==0){
+    if(mouseIsPressed && mx > 0 && mx < width && my > 0 && my < height && mouseButton === LEFT && frameCount%3==0){
         //createParticles();
         createScriptText(true);
         //noStroke();
