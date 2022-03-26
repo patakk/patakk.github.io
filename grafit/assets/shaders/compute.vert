@@ -114,6 +114,7 @@ void main() {
    vec2 acc = vec2(0., 0.);
    vec2 seed = i_Seed;
    vec2 resolution = u_Resolution;
+   vec2 mouse = vec2(u_Origin.x, resolution.y - u_Origin.y);
    float speed = u_Speed;
    float time = u_Time;
 
@@ -149,8 +150,20 @@ void main() {
    noisexy.x = r*cos(ang)*1.5 + 0.0*r*cos(ang2);
    noisexy.y = r*sin(ang)*.5 + 0.0*r*sin(ang2);
 
-   acc.x = noisexy.x;
-   acc.y = noisexy.y;
+	vec2 fromMouse = pos - mouse;
+	float tomouselen = length(fromMouse);
+	if(tomouselen < resolution.x*0.2){
+		fromMouse = fromMouse / tomouselen;
+		fromMouse = fromMouse * (1. - tomouselen/resolution.x*0.1);
+		fromMouse *= 5.;
+	}
+	else{
+		fromMouse = vec2(0.0);
+	}
+	
+
+   acc.x = noisexy.x + fromMouse.x;
+   acc.y = noisexy.y + fromMouse.y;
 
    float drag = 0.95 + 0.04 * i_Seed.y;
 

@@ -24,6 +24,9 @@ canvas {
     border-color: #b4b4b4;
 }
 
+.dg ul {
+}
+
 
 .dg.main .close-button {
     background-color: #ccc;
@@ -32,6 +35,7 @@ canvas {
 
 .dg.main.a {
     width: 300px;
+    border: 1px solid rgba(181, 181, 181, 1.0);
 }
 
 .dg {
@@ -39,8 +43,7 @@ canvas {
     text-shadow: none !important;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    border-width: 3px;
-    border-color: #9e9e9e;
+    border: 1px solid rgba(181, 181, 181, 1.0);
 }
 
 .dg.main::-webkit-scrollbar {
@@ -53,11 +56,14 @@ canvas {
 
 .dg li:not(.folder) {
     background: #1a1a1a;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid rgba(181, 181, 181, 1.0);
 }
 
 .dg li.save-row .button {
     text-shadow: none !important;
+}
+
+.dg li {
 }
 
 
@@ -87,8 +93,7 @@ canvas {
 }
 
 .dg .cr.number {
-    border-width: 1px;
-    border-color: #aeaeae;
+    border: 1px solid rgba(181, 181, 181, 1.0);
 }
 
 
