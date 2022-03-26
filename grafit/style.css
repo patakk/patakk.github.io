@@ -5,6 +5,18 @@ body {
     font-family: "Roboto Mono", sans-serif;
 }
 
+.twt {
+    margin: 50px;
+    padding: 0;
+    position:absolute;
+    bottom:0;
+    left:0;
+    
+}
+
+img {
+    width: 20px;
+}
 
 canvas {
     border-style: solid;
