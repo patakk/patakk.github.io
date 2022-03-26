@@ -496,17 +496,47 @@ function preventBehavior(e) {
 
 function displayMessage(){
   const message = document.createElement("div");
-  message.innerHTML = "heelllooooo";
+  const l1 = document.createElement("div");
+  const l2 = document.createElement("div");
+  const l3 = document.createElement("img");
+
+  var win = window,
+  doc = document,
+  body = doc.getElementsByTagName('body')[0],
+  ww = win.innerWidth || canvas.clientWidth || body.clientWidth,
+  hh = win.innerHeight|| canvas.clientHeight|| body.clientHeight;
+
+  l1.innerHTML = "mobile devices not supported, sorry";
+  l2.innerHTML = "here's an image";
+  l3.src = "./assets/sample.png";
+  l3.style.width = ww*0.8 + "px";
+  
+  l3.style.borderStyle = "solid";
+  l3.style.borderWidth = "10px";
+  l3.style.borderColor = "#b4b4b4";
+  message.appendChild(l1);
+  message.appendChild(document.createElement("br"));
+  message.appendChild(l2);
+  message.appendChild(document.createElement("br"));
+  message.appendChild(document.createElement("br"));
+  message.appendChild(l3);
   document.body.prepend(message);
+
+  message.style.position = 'absolute';
+  message.style.textAlign = 'center';
+  message.style.white_space = 'pre';
+  message.style.left = ww/2 - l1.offsetWidth/2 + 'px';
+  message.style.top = hh/2 - ww*0.8*.6 + 'px';
+
+  console.log(ww/2, l1.offsetWidth);
 }
 
 function main() {
     document.addEventListener("touchmove", preventBehavior, {passive: false});
    
-
     if(isMobile()){
-      //displayMessage();
-      //return;
+      displayMessage();
+      return;
     }
     canvas = document.createElement("canvas");
     canvas.width = 100;
