@@ -152,7 +152,7 @@ void main() {
 
 	vec2 fromMouse = pos - mouse;
 	float tomouselen = length(fromMouse);
-	if(tomouselen < resolution.x*0.2){
+	if(tomouselen < resolution.x*0.1){
 		fromMouse = fromMouse / tomouselen;
 		fromMouse = fromMouse * (1. - tomouselen/resolution.x*0.1);
 		fromMouse *= 5.;
