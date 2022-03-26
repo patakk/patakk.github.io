@@ -526,7 +526,7 @@ function displayMessage(){
   message.style.textAlign = 'center';
   message.style.white_space = 'pre';
   message.style.left = ww/2 - l1.offsetWidth/2 + 'px';
-  message.style.top = hh/2 - ww*0.8*.6 + 'px';
+  message.style.top = hh/2 - ww*0.8*.73 + 'px';
 
   console.log(ww/2, l1.offsetWidth);
 }
