@@ -9,6 +9,7 @@ uniform float u_MinTheta;
 uniform float u_MaxTheta;
 uniform float u_MinSpeed;
 uniform float u_MaxSpeed;
+uniform float u_Speed;
 
 uniform vec2 u_Resolution;
 
@@ -111,8 +112,9 @@ void main() {
    vec2 pos = i_Position;
    vec2 vel = i_Velocity;
    vec2 acc = vec2(0., 0.);
-   vec2 resolution = u_Resolution;
    vec2 seed = i_Seed;
+   vec2 resolution = u_Resolution;
+   float speed = u_Speed;
    float time = u_Time;
 
 	float tttime = time*0.00015 + pos.x/resolution.x;
@@ -125,16 +127,25 @@ void main() {
 	float incx = clamp(4. + round(power(simplex3d(nzpp+vec3(0.2589, 0.4891, 1.131)), 4.)*16.), 5., 16.);
 	float incy = clamp(4. + round(power(simplex3d(nzpp+vec3(3.2589, 0.4891, 44.131)), 4.)*16.), 5., 16.);
 	vec2 poss = pos.xy/resolution.x;
-   incx = incy = 5. + 11. * power(clamp(simplex3d(vec3(mod(time, 1000.0)*0.001 + pos.x/resolution.x*.03)), -1., 1.)/2.+.5, 4.);
+   incx = 1. + 3. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06)), -1., 1.)/2.+.5, 4.);
+   incy = 1. + 0. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.x/resolution.x*.03 + .41)), -1., 1.)/2.+.5, 4.);
 	poss.x = round(incx*poss.x)/incx;
 	poss.y = round(incy*poss.y)/incy;
 	vec3 nzp = vec3(poss.x, poss.y, ttime*0.002)*2.;
    vec2 noisexy = vec2(0., 0.);
    float qq = clamp(simplex3d(nzp*0.5+vec3(0.2589, 0.4891, 5.1311)), -1.0, 1.0);
+
+   float r = .6;
+   if(length(pos.xy/resolution.xy-.5) < 0.1){
+      //r *= 4.;
+   }
+
    float ang = 67.*simplex3d(nzp*0.527*qq);
    float ang2 = 47.*simplex3d(nzp*0.527*qq);
    //ang = 66.*simplex3d(nzp*.527*qq + time*0.02);
-   float r = .6;
+
+
+
    noisexy.x = r*cos(ang)*1.5 + 0.0*r*cos(ang2);
    noisexy.y = r*sin(ang)*.5 + 0.0*r*sin(ang2);
 
@@ -146,7 +157,7 @@ void main() {
    vel = vel + acc*1.05;
    vel = vel * drag;
    
-   pos = pos + vel;
+   pos = pos + vel*speed;
    
    //age += u_TimeDelta;
 

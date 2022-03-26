@@ -1,4 +1,14 @@
 var frameCount = Math.random()*10000.;
+var gui;
+var webgl_context;
+var particles_info = {
+  count: 1000000,
+  speed: 1.,
+};
+var notholding = false;
+var canvas;
+var count_prev = particles_info["count"];
+var speed_prev = particles_info["speed"];
 
 var getSourceSynch = function(url) {
     var req = new XMLHttpRequest();
@@ -296,6 +306,7 @@ var vao_desc = [
 }
 
 function render(gl, state, timestamp_millis) {
+  
   frameCount = frameCount + 1.0;
 
   var num_part = state.born_particles;
@@ -316,6 +327,9 @@ function render(gl, state, timestamp_millis) {
   gl.uniform1f(
     gl.getUniformLocation(state.particle_update_program, "u_Time"),
     frameCount);
+  gl.uniform1f(
+      gl.getUniformLocation(state.particle_update_program, "u_Speed"),
+      speed_prev);
   gl.uniform1f(
     gl.getUniformLocation(state.particle_update_program, "u_TotalTime"),
     state.total_time);
@@ -362,7 +376,7 @@ function render(gl, state, timestamp_millis) {
   gl.viewport(0, 0,
     gl.drawingBufferWidth, gl.drawingBufferHeight);
   // Set the clear color to darkish green.
-  gl.clearColor(0.7, 0.7, 0.7, 1.0);
+  gl.clearColor(0.64, 0.64, 0.64, 1.0);
   // Clear the context with the newly set color. This is
   // the function call that actually does the drawing.
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -378,13 +392,34 @@ function render(gl, state, timestamp_millis) {
   var tmp = state.read;
   state.read = state.write;
   state.write = tmp;
-  window.requestAnimationFrame(function(ts) { render(gl, state, ts); });
-}
+  repositionGui();
 
-var canvas;
+    var pc = particles_info["count"];
+  if(count_prev != pc && notholding){
+    count_prev = pc;
+    
+    state = resetState();
+  }
+  if(speed_prev != particles_info["speed"]){
+    speed_prev = particles_info["speed"];
+  }
+  window.requestAnimationFrame(function(ts) { render(gl, state, ts); });
+
+}
 
 function reportWindowSize() {
     repositionCanvas(canvas)
+}
+
+function repositionGui(){
+  var guiwi = document.getElementsByClassName("dg main a")[0].style.width;
+  var ww = "235px";
+  if(guiwi != ww){
+    document.getElementsByClassName("dg main a")[0].style.width = ww
+    document.getElementsByClassName("dg main a")[0].style.position = "absolute";
+    document.getElementsByClassName("dg main a")[0].style.left = "30px";
+    document.getElementsByClassName("dg main a")[0].style.top = "30px";
+  }
 }
 
 function repositionCanvas(canvas){
@@ -395,13 +430,33 @@ function repositionCanvas(canvas){
     hh = win.innerHeight|| canvas.clientHeight|| body.clientHeight;
     
     win.onresize = reportWindowSize;
-    canvas.width = ww;
-    canvas.height = hh;
+    canvas.width = Math.min(ww, hh) - 130;
+    canvas.height = Math.min(ww, hh) - 130;
 
     console.log("canvas");
     canvas.style.position = 'absolute';
     canvas.style.left = ww/2 - canvas.width/2 + 'px';
     canvas.style.top = hh/2 - canvas.height/2 + 'px';
+    
+}
+
+function resetState(){
+    canvas.onmousemove = function(e) {
+      var x = 2.0 * (e.pageX - this.offsetLeft)/this.width - 1.0; 
+      var y = -(2.0 * (e.pageY - this.offsetTop)/this.height - 1.0);
+      state.origin = [x, y];
+    };
+    var state =
+    init(
+      webgl_context,
+      count_prev, /* number of particles */
+      0.5, /* birth rate */
+      1.01, 1.15, /* life range */
+      Math.PI/2.0 - 0.5, Math.PI/2.0 + 0.5, /* direction range */
+      0.5, 1.0, /* speed range */
+      [0.0, -0.8]
+    ); /* gravity */
+    return state;
 }
 
 function main() {
@@ -409,28 +464,26 @@ function main() {
     canvas.width = 800;
     canvas.height = 600;
     repositionCanvas(canvas);
-    var webgl_context = canvas.getContext("webgl2");
+
+    document.body.onmousedown = function() { 
+      notholding = false;
+    }
+    document.body.onmouseup = function() {
+      notholding = true;
+    }
+    
+    gui = new dat.GUI({name: 'My GUI'});
+    gui.add(particles_info, 'count', 50000, 5000000);
+    gui.add(particles_info, 'speed', 0.1, 3);
+
+    repositionGui();
+    webgl_context = canvas.getContext("webgl2");
     if (webgl_context != null) {
       document.body.appendChild(canvas);
-      var state =
-        init(
-          webgl_context,
-          1111111, /* number of particles */
-          0.5, /* birth rate */
-          1.01, 1.15, /* life range */
-          Math.PI/2.0 - 0.5, Math.PI/2.0 + 0.5, /* direction range */
-          0.5, 1.0, /* speed range */
-          [0.0, -0.8]); /* gravity */
-  
-      /* Makes the particle system follow the mouse pointer */
-      canvas.onmousemove = function(e) {
-        var x = 2.0 * (e.pageX - this.offsetLeft)/this.width - 1.0; 
-        var y = -(2.0 * (e.pageY - this.offsetTop)/this.height - 1.0);
-        state.origin = [x, y];
-      };
-      window.requestAnimationFrame(
-        function(ts) { render(webgl_context, state, ts); });
-    } else {
+      var state = resetState();
+      window.requestAnimationFrame(function(ts) { render(webgl_context, state, ts); });
+    }
+    else {
       document.write("WebGL2 is not supported by your browser");
     }
-  }
+}
