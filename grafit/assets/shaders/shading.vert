@@ -6,6 +6,7 @@ uniform vec2 u_Resolution;
 in vec2 i_Position;
 in float i_Age;
 in vec2 i_Seed;
+uniform sampler2D u_InputImage;
 
 out float v_Age;
 out vec2 v_Seed;
@@ -21,6 +22,10 @@ void main() {
   else{
     ps = 2. + 1.*ps;
   }
+  vec2 tc = i_Position/u_Resolution;
+  tc.y = 1. - tc.y;
+	float texcol = 1. - texture(u_InputImage, tc).r;
+  //gl_PointSize = 3.*texcol;
   gl_PointSize = ps;
   gl_Position = vec4(pos, 0.0, 1.0);
 }

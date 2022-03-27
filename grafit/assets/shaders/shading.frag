@@ -18,5 +18,11 @@ void main() {
             vec3(1.0,0.7,0.4),
             vec3(0.0,0.15,0.20)),
             1.0);*/
-  o_FragColor = vec4(0.0, 0.0, 0.0, 0.3);
+  //if(v_Age > 100.)
+  //  discard;
+  //o_FragColor = vec4(0.0, 0.0, 0.0, .3*clamp(1. - v_Age/100., 0., 1.));
+
+  o_FragColor = vec4(0.0, 0.0, 0.0, .1 + .26*clamp(1. - v_Age/100., 0., 1.));
+
+  //o_FragColor = vec4(0.0, 0.0, 0.0, .3);
 }

@@ -2,9 +2,9 @@
 precision mediump float;
 
 uniform float u_Time;
-uniform sampler2D u_RgNoise;
 uniform vec2 u_Gravity;
 uniform vec2 u_Origin;
+uniform sampler2D u_InputImage;
 uniform float u_MinTheta;
 uniform float u_MaxTheta;
 uniform float u_MinSpeed;
@@ -118,6 +118,11 @@ void main() {
    float speed = u_Speed;
    float time = u_Time;
 
+	ivec2 ipos = ivec2(int(pos.x), int(pos.y));
+	vec2 tc =  pos.xy/resolution.xy;
+	tc.y = 1. - tc.y;
+	float texcol = texture(u_InputImage, tc).r*1.;
+
 	float tttime = time*0.00015 + pos.x/resolution.x;
 	tttime = mod(tttime, 1.0);
 	tttime = pow(tttime, 5.);
@@ -143,10 +148,9 @@ void main() {
       //r *= 4.;
    }
 
-   float ang = 67.*simplex3d(nzp*0.527*qq);
+   float ang = 7.*simplex3d(nzp*0.527*qq);
    float ang2 = 47.*simplex3d(nzp*0.527*qq);
    //ang = 66.*simplex3d(nzp*.527*qq + time*0.02);
-
 
 
    noisexy.x = r*cos(ang)*1.5 + 0.0*r*cos(ang2);
@@ -162,35 +166,47 @@ void main() {
 	else{
 		fromMouse = vec2(0.0);
 	}
-	
+
+	ivec2 noise_coord = ivec2(int(pos.x), int(pos.y));
 
    acc.x = noisexy.x + fromMouse.x;
    acc.y = noisexy.y + fromMouse.y;
 
    float drag = 0.95 + 0.04 * i_Seed.y;
+   drag = drag  - (texcol)*.2;
 
-   vel = vel + acc*1.05;
+
+   //vel = vel + acc*1.05;
+   vel = vel + .1*vec2(1.,1.)+acc*.991;
    vel = vel * drag;
+
    
    pos = pos + vel*speed;
    
    //age += u_TimeDelta;
 
+   v_Age = i_Age + 1.0;
+   if(texcol > 0.0){
+	   v_Age = 0.0;
+   }
    if(pos.x >= resolution.x){
-      pos.x = 0.0;
+      pos.x = pos.x - resolution.x;
+	   v_Age = 11110.0;
    }
    if(pos.y > resolution.y){
-      pos.y = 0.0;
+      pos.y = pos.y - resolution.y;
+	   v_Age = 11110.0;
    }
    if(pos.x < 0.0){
-      pos.x = resolution.x - 1.0;
+      pos.x = pos.x + resolution.x;
+	   v_Age = 11110.0;
    }
    if(pos.y < 0.0){
-      pos.y = resolution.y - 1.0;
+      pos.y = pos.y + resolution.y;
+	   v_Age = 11110.0;
    }
 
    v_Position = pos;
    v_Velocity = vel;
    v_Seed = i_Seed;
-   v_Age = i_Age;
 }
