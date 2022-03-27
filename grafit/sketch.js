@@ -161,7 +161,10 @@ function initialParticleData(num_parts, min_age, max_age) {
     data.push(Math.random()*0 + 1000);
 
     // seed
-    data.push(Math.random());
+    var popacity = 0.16;
+    if(num_parts < 500000)
+      popacity = 0.16 + (0.7-0.16)*(1. - (num_parts-50000)/(500000-50000));
+    data.push(popacity);
     data.push(Math.random());
     
     // vel
@@ -358,6 +361,7 @@ var vao_desc = [
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, input_image);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
   return {
     particle_sys_buffers: buffers,
     particle_sys_vaos: vaos,
@@ -377,7 +381,7 @@ var vao_desc = [
     max_theta: max_theta,
     min_speed: min_speed,
     max_speed: max_speed,
-    input_image: input_image_tex
+    input_image: input_image_tex,
   };
 }
 
@@ -444,7 +448,6 @@ function render(gl, state, timestamp_millis) {
     canvas.width,
     canvas.height);
   state.total_time += time_delta;
-    
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, state.input_image);
   gl.uniform1i(

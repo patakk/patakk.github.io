@@ -2,6 +2,7 @@
 precision mediump float;
 
 uniform vec2 u_Resolution;
+uniform float u_Opacity;
 
 in vec2 i_Position;
 in float i_Age;
@@ -13,6 +14,7 @@ out vec2 v_Seed;
 
 void main() {
   v_Age = i_Age;
+  v_Seed = i_Seed;
   vec2 pos = i_Position/u_Resolution*2.0 - 1.0;
   //gl_PointSize = 1.0 + 6.0 * (1.0 - i_Age/i_Seed);
   float ps = i_Seed.x;
