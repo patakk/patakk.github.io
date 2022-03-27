@@ -665,9 +665,17 @@ function main() {
     gui.add(particles_info, 'speed', 0.1, 3);
     txtinput_field = gui.add(particles_info, 'input', 0.1, 3).onFinishChange(function (value) {
       var strr = txtinput_field.getValue();
-      strr = strr.slice(0, 7);
+      var rstrr = "";
+      var rows = Math.ceil(strr.length/8);
+      for(var i = 0; i < rows; i++){
+        rstrr += strr.slice(i*8, i*8+8);
+        if(i < rows-1 && rows > 1)
+          rstrr += "\n";
+      }
+      //strr = strr.slice(0, 8);
       txtinput_field.setValue(strr);
-      myp5.reset(strr);
+      console.log("x",rstrr);
+      myp5.reset(rstrr);
     });
     console.log(txtinput_field);
 
