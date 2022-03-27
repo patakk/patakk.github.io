@@ -12,17 +12,18 @@ body {
     position:absolute;
     bottom:0;
     left:0;
-    
-}
-
-img {
     width: 20px;
+    
 }
 
 canvas {
     border-style: solid;
     border-width: 10px;
     border-color: #b4b4b4;
+}
+
+#defaultCanvas0 {
+    display: none;
 }
 
 .dg ul {
@@ -117,4 +118,16 @@ canvas {
 
 .dg .c .slider:hover {
     background: #3a3a3a;
+}
+
+.dg .cr.string {
+    border: none;
+}
+
+.dg .cr.string input[type=text] {
+    color: rgb(224, 224, 224);
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+    margin-top: 3px;
+    text-transform: uppercase;
 }

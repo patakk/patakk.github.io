@@ -133,12 +133,12 @@ void main() {
 	float incx = clamp(4. + round(power(simplex3d(nzpp+vec3(0.2589, 0.4891, 1.131)), 4.)*16.), 5., 16.);
 	float incy = clamp(4. + round(power(simplex3d(nzpp+vec3(3.2589, 0.4891, 44.131)), 4.)*16.), 5., 16.);
 	vec2 poss = pos.xy/resolution.x;
-   incx = 1. + 3. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06)), -1., 1.)/2.+.5, 4.);
-   float incxx = 1. + 3. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06 + .1251)), -1., 1.)/2.+.5, 4.);
-   float incyy = 1. + 3. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06+ .8888)), -1., 1.)/2.+.5, 4.);
-   incy = 1. + 1. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.x/resolution.x*.03 + .41)), -1., 1.)/2.+.5, 4.);
-	poss.x = round(incx*poss.x)/incx + round(incxx)*0.5;
-	poss.y = round(incy*poss.y)/incy + round(incyy)*0.5;
+   incx = 1. + 7. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06)), -1., 1.)/2.+.5, 4.);
+   incy = 1. + 2. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.x/resolution.x*.03 + .41)), -1., 1.)/2.+.5, 4.);
+   float incxx = 1. + 1. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06 + .1251)), -1., 1.)/2.+.5, 4.);
+   float incyy = 1. + 2. * power(clamp(simplex3d_fractal(vec3(mod(time, 1000.0)*0.001 + pos.y/resolution.y*.06+ .8888)), -1., 1.)/2.+.5, 4.);
+	poss.x = round(7.*poss.x)/7. + round(incxx)*0.;
+	poss.y = round(incy*poss.y)/incy + round(incyy)*.5;
 	vec3 nzp = vec3(poss.x, poss.y, ttime*0.002)*2.;
    vec2 noisexy = vec2(0., 0.);
    float qq = clamp(simplex3d(nzp*0.5+vec3(0.2589, 0.4891, 5.1311)), -1.0, 1.0);
@@ -172,12 +172,12 @@ void main() {
    acc.x = noisexy.x + fromMouse.x;
    acc.y = noisexy.y + fromMouse.y;
 
-   float drag = 0.95 + 0.04 * i_Seed.y;
+   float drag = 0.98 + 0.01 * i_Seed.y;
    drag = drag  - (texcol)*.2;
 
 
    //vel = vel + acc*1.05;
-   vel = vel + .1*vec2(1.,1.)+acc*.991;
+   vel = vel + .0*vec2(1.,1.)+acc*.991;
    vel = vel * drag;
 
    
@@ -186,8 +186,8 @@ void main() {
    //age += u_TimeDelta;
 
    v_Age = i_Age + 1.0;
-   if(texcol > 0.0){
-	   v_Age = 0.0;
+   if(texcol > 0.1){
+	  v_Age = 0.0;
    }
    if(pos.x >= resolution.x){
       pos.x = pos.x - resolution.x;

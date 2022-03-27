@@ -3,15 +3,59 @@ var gui;
 var webgl_context;
 var particles_info = {
   count: 1000000,
-  speed: 1.,
+  speed: .5,
+  input: "hello",
 };
 var notholding = false;
 var canvas;
+var text_canvas;
 var count_prev = particles_info["count"];
 var speed_prev = particles_info["speed"];
 var prev_origin = [-1000, -1000];
-
 var input_image;
+var gr;
+var caaaa;
+var input_image_tex;
+
+let courierM;
+
+let mysketch = function(p) {
+  let x = 0;
+  let y = 0;
+  let courierM;
+  var thefont = 0;
+
+  p.resetFont = function(font){
+    thefont = font;
+    p.reset("hello");
+  }
+
+  p.reset = function(txtinput){
+    txtinput = txtinput.toUpperCase();
+    p.background(0);
+    p.fill(255);
+    p.noStroke();
+    p.textSize(44);
+    if(thefont != 0){
+      p.textFont(thefont);
+      //p.textFont(p.courierM);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text(txtinput, p.width/2, p.height/2);
+  }
+  }
+
+  p.setup = function() {
+    p.createCanvas(256, 256);
+    //gr = p.createGraphics(256, 256);
+    p.reset("hello");
+    p.loadFont('assets/FutuBd_.ttf', p.resetFont);
+  };
+
+  p.draw = function() {
+  };
+};
+
+let myp5 = new p5(mysketch);
 
 function isMobile() {
   let check = false;
@@ -339,6 +383,17 @@ var vao_desc = [
 
 function render(gl, state, timestamp_millis) {
   
+  input_image.src = myp5._renderer.canvas.toDataURL("image/png");
+  //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
+  //console.log(myp5._renderer.canvas.toDataURL("image/png"));
+  input_image.onload = function (){
+    gl.bindTexture(gl.TEXTURE_2D, input_image_tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, input_image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    state.input_image = input_image_tex;
+  }
+    
   frameCount = frameCount + 1.0;
 
   var num_part = state.born_particles;
@@ -539,7 +594,7 @@ function displayMessage(){
   ww = win.innerWidth || canvas.clientWidth || body.clientWidth,
   hh = win.innerHeight|| canvas.clientHeight|| body.clientHeight;
 
-  l1.innerHTML = "mobile devices not supported, sorry";
+  l1.innerHTML = "mobile devices not supported";
   l2.innerHTML = "here's an image";
   l3.src = "./assets/sample.png";
   l3.style.width = ww*0.8 + "px";
@@ -575,6 +630,15 @@ function main() {
     canvas.width = 100;
     canvas.height = 100;
     repositionCanvas(canvas);
+    
+    //text_canvas = p5.createGraphics(512, 512, WEBGL);
+    // text_canvas = myp5._renderer.canvas.toDataURL("image/png");
+
+    //caaaa = document.createElement("img");
+    //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
+    //caaaa.onload = function (){
+    //  document.body.appendChild(caaaa);
+    //}
 
     /*document.body.onmousedown = function() { 
       notholding = false;
@@ -599,19 +663,29 @@ function main() {
     gui = new dat.GUI({name: 'My GUI'});
     gui.add(particles_info, 'count', 50000, 5000000);
     gui.add(particles_info, 'speed', 0.1, 3);
+    txtinput_field = gui.add(particles_info, 'input', 0.1, 3).onFinishChange(function (value) {
+      var strr = txtinput_field.getValue();
+      strr = strr.slice(0, 7);
+      txtinput_field.setValue(strr);
+      myp5.reset(strr);
+    });
+    console.log(txtinput_field);
 
     repositionGui();
     webgl_context = canvas.getContext("webgl2");
     if (webgl_context != null) {
       document.body.prepend(canvas);
-      toDataURL('./assets/grafit.png', function(dataUrl) {
-          input_image = new Image();
-          input_image.src = './assets/grafit.png';
-          input_image.onload = function (){
-            var state = resetState();
-            window.requestAnimationFrame(function(ts) { render(webgl_context, state, ts); });
-          }
-      })
+        input_image = new Image();
+        //input_image.src = './assets/grafit.png';
+        console.log("b", myp5._setupDone);
+        
+        input_image.src = myp5._renderer.canvas.toDataURL("image/png");
+        //console.log(myp5._renderer.canvas.toDataURL("image/png"));
+        input_image_tex = webgl_context.createTexture()
+        input_image.onload = function (){
+          var state = resetState();
+          window.requestAnimationFrame(function(ts) { render(webgl_context, state, ts); });
+        }
     }
     else {
       document.write("WebGL2 is not supported by your browser");

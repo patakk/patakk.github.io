@@ -22,7 +22,7 @@ void main() {
   //  discard;
   //o_FragColor = vec4(0.0, 0.0, 0.0, .3*clamp(1. - v_Age/100., 0., 1.));
 
-  o_FragColor = vec4(0.0, 0.0, 0.0, .1 + .26*clamp(1. - v_Age/100., 0., 1.));
+  //o_FragColor = vec4(0.0, 0.0, 0.0, 0. + .26*clamp(1. - v_Age/100., 0., 1.));
 
-  //o_FragColor = vec4(0.0, 0.0, 0.0, .3);
+  o_FragColor = vec4(0.0, 0.0, 0.0, .16);
 }
