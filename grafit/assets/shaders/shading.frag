@@ -20,6 +20,15 @@ float power(float p, float g) {
 vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
 {  return a + b*cos( 6.28318*(c*t+d) ); }
 
+vec3 hsb2rgb( in vec3 c ){
+    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
+                             6.0)-3.0)-1.0,
+                     0.0,
+                     1.0 );
+    rgb = rgb*rgb*(3.0-2.0*rgb);
+    return c.z * mix( vec3(1.0), rgb, c.y);
+}
+
 void main() {
   vec4 magic = vec4(
     palette(v_Seed.y,
@@ -49,6 +58,7 @@ void main() {
     outcol_col = col0 + camp*(col1 - col0);
   else
     outcol_col = col0 + camp*(col2 - col0);
+
    //outcol_col = (col0 + camp*(col2 - col0)) + power((0.5 + 0.5*sin(v_Seed.y*3.14*2.)), 6.)*((col0 + camp*(col1 - col0)) - (col0 + camp*(col2 - col0)));
    //outcol_col = (col0 + camp*(col2 - col0)) + power(v_Seed.y, 6.)*((col0 + camp*(col1 - col0)) - (col0 + camp*(col2 - col0)));
 
