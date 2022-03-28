@@ -5,10 +5,6 @@ uniform float u_Time;
 uniform vec2 u_Gravity;
 uniform vec2 u_Origin;
 uniform sampler2D u_InputImage;
-uniform float u_MinTheta;
-uniform float u_MaxTheta;
-uniform float u_MinSpeed;
-uniform float u_MaxSpeed;
 uniform float u_Speed;
 
 uniform vec2 u_Resolution;

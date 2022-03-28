@@ -1,12 +1,13 @@
+var particles_info = {
+    count: 1000000,
+    speed: .5,
+    input: "hello",
+    colors: false,
+  };
+  
 var frameCount = Math.random()*10000.;
 var gui;
 var webgl_context;
-var particles_info = {
-  count: 1000000,
-  speed: .5,
-  input: "hello",
-  colors: false,
-};
 var notholding = false;
 var canvas;
 var text_canvas;
@@ -15,18 +16,17 @@ var speed_prev = particles_info.speed;
 var prev_origin = [-1000, -1000];
 var input_image;
 var gr;
-var caaaa;
 var input_image_tex;
 
 var colors_current = 0.0;
 var colors_target = 0.0;
 
-let courierM;
+var time0 = 0;
+var time1 = 0;
 
-let mysketch = function(p) {
+let textGen = function(p) {
   let x = 0;
   let y = 0;
-  let courierM;
   var thefont = 0;
 
   p.resetFont = function(font){
@@ -42,7 +42,6 @@ let mysketch = function(p) {
     p.textSize(44);
     if(thefont != 0){
       p.textFont(thefont);
-      //p.textFont(p.courierM);
       p.textAlign(p.CENTER, p.CENTER);
       p.text(txtinput, p.width/2, p.height/2-5);
   }
@@ -50,7 +49,6 @@ let mysketch = function(p) {
 
   p.setup = function() {
     p.createCanvas(256, 256);
-    //gr = p.createGraphics(256, 256);
     p.reset("hello");
     p.loadFont('assets/FutuBd_.ttf', p.resetFont);
   };
@@ -61,10 +59,8 @@ let mysketch = function(p) {
   };
 };
 
-var time0 = 0;
-var time1 = 0;
+let myp5 = new p5(textGen);
 
-let myp5 = new p5(mysketch);
 
 function isMobile() {
   let check = false;
@@ -158,13 +154,12 @@ function randomRGData(size_x, size_y) {
   return new Uint8Array(d);
 }
 
-function initialParticleData(num_parts, min_age, max_age) {
+function initialParticleData(num_parts) {
   var data = [];
   for (var i = 0; i < num_parts; ++i) {
     // pos
     data.push(Math.random()*canvas.width);
     data.push(Math.random()*canvas.height);
-    var life = min_age + Math.random() * (max_age - min_age);
 
     // age
     data.push(Math.random()*0 + 1000);
@@ -214,26 +209,7 @@ function setupParticleBufferVAO(gl, buffers, vao) {
 function init(
     gl,
     num_particles,
-    particle_birth_rate,
-    min_age,
-    max_age, 
-    min_theta,
-    max_theta,
-    min_speed,
-    max_speed,
-    gravity
     ) {
-  if (max_age < min_age) {
-    throw "Invalid min-max age range.";
-  }
-  if (max_theta < min_theta ||
-      min_theta < -Math.PI ||
-      max_theta > Math.PI) {
-    throw "Invalid theta range.";
-  }
-  if (min_speed > max_speed) {
-    throw "Invalid min-max speed range.";
-  }
   var update_program = createGLProgram(
     gl,
     [
@@ -337,7 +313,7 @@ var vao_desc = [
     },
   ];
   var initial_data =
-    new Float32Array(initialParticleData(num_particles, min_age, max_age));
+    new Float32Array(initialParticleData(num_particles));
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers[0]);
   gl.bufferData(gl.ARRAY_BUFFER, initial_data, gl.STREAM_DRAW);
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers[1]);
@@ -387,13 +363,7 @@ var vao_desc = [
     rg_noise: rg_noise_texture,
     total_time: 0.0,
     born_particles: initial_data.length / 7,
-    birth_rate: particle_birth_rate,
-    gravity: gravity,
     origin: [-1000.0, -1000.0],
-    min_theta: min_theta,
-    max_theta: max_theta,
-    min_speed: min_speed,
-    max_speed: max_speed,
     input_image: input_image_tex,
     particle_opacity: particle_opacity,
   };
@@ -407,7 +377,6 @@ function render(gl, state, timestamp_millis) {
   input_image.src = myp5._renderer.canvas.toDataURL("image/png");
   count++;
   //input_image.src = './assets/fingerprint.png';
-  //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
   input_image.onload = function (){
     gl.bindTexture(gl.TEXTURE_2D, input_image_tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, input_image);
@@ -443,24 +412,9 @@ function render(gl, state, timestamp_millis) {
     gl.getUniformLocation(state.particle_update_program, "u_TotalTime"),
     state.total_time);
   gl.uniform2f(
-    gl.getUniformLocation(state.particle_update_program, "u_Gravity"),
-    state.gravity[0], state.gravity[1]);
-  gl.uniform2f(
     gl.getUniformLocation(state.particle_update_program, "u_Origin"),
     state.origin[0],
     state.origin[1]);
-  gl.uniform1f(
-    gl.getUniformLocation(state.particle_update_program, "u_MinTheta"),
-    state.min_theta);
-  gl.uniform1f(
-    gl.getUniformLocation(state.particle_update_program, "u_MaxTheta"),
-    state.max_theta);
-  gl.uniform1f(
-    gl.getUniformLocation(state.particle_update_program, "u_MinSpeed"),
-    state.min_speed);
-  gl.uniform1f(
-    gl.getUniformLocation(state.particle_update_program, "u_MaxSpeed"),
-    state.max_speed);
   gl.uniform2f(
     gl.getUniformLocation(state.particle_update_program, "u_Resolution"),
     canvas.width,
@@ -597,13 +551,8 @@ function resetState(){
   var state =
   init(
     webgl_context,
-    count_prev, /* number of particles */
-    0.5, /* birth rate */
-    1.01, 1.15, /* life range */
-    Math.PI/2.0 - 0.5, Math.PI/2.0 + 0.5, /* direction range */
-    0.5, 1.0, /* speed range */
-    [0.0, -0.8]
-  ); /* gravity */
+    count_prev,
+  );
   return state;
 }
 
@@ -658,22 +607,6 @@ function main() {
     canvas.width = 100;
     canvas.height = 100;
     repositionCanvas(canvas);
-    
-    //text_canvas = p5.createGraphics(512, 512, WEBGL);
-    // text_canvas = myp5._renderer.canvas.toDataURL("image/png");
-
-    //caaaa = document.createElement("img");
-    //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
-    //caaaa.onload = function (){
-    //  document.body.appendChild(caaaa);
-    //}
-
-    /*document.body.onmousedown = function() { 
-      notholding = false;
-    }
-    document.body.onmouseup = function() {
-      notholding = true;
-    }*/
     
     window.addEventListener('mousedown', function() {
       notholding = false;
