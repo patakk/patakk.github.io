@@ -258,8 +258,8 @@ function windowResized(){
 }
 
 function draw() {
-    mx = mx + (mouseX - mx)*0.25;
-    my = my + (mouseY - my)*0.25;
+    mx = mx + (mouseX - mx)*0.96;
+    my = my + (mouseY - my)*0.96;
 
     //if(frameCount % 100==0)
     //    print(frameRate());
@@ -301,8 +301,8 @@ function draw() {
     }
 
     if(mouseIsPressed && mx > 0 && mx < width && my > 0 && my < height && mouseButton === LEFT && frameCount%3==0){
-        //createParticles();
-        createScriptText(true);
+        createParticles();
+        //createScriptText(true);
         //noStroke();
         //fill('#e73900');
         //var rad = random(3,14);
