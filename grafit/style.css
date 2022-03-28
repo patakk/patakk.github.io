@@ -131,3 +131,40 @@ canvas {
     margin-top: 3px;
     text-transform: uppercase;
 }
+
+.dg .cr.boolean {
+    border: none;
+}
+
+.dg .cr.boolean:hover {
+    background: #1f1f1f;
+    border: none;
+}
+
+.dg .c input[type=checkbox] {
+    -webkit-appearance: none;
+    appearance: none;
+    font: inherit;
+    background-color: #ddd;
+    width: .9em;
+    height: .9em;
+    border-style: solid;
+    border-width: 0px;
+    border-color: #ddd;
+    transform: translate(-.5em, -0.0em);
+    display: grid;
+    place-content: center;
+}
+
+.dg .c input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.68em;
+    transform: scale(0);
+    transition: 50ms transform ease-in-out;
+    box-shadow: inset 1em 1em 1em 1em #3a3a3a;
+  }
+
+  .dg .c input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }

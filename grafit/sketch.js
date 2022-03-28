@@ -5,17 +5,21 @@ var particles_info = {
   count: 1000000,
   speed: .5,
   input: "hello",
+  colors: false,
 };
 var notholding = false;
 var canvas;
 var text_canvas;
-var count_prev = particles_info["count"];
-var speed_prev = particles_info["speed"];
+var count_prev = particles_info.count;
+var speed_prev = particles_info.speed;
 var prev_origin = [-1000, -1000];
 var input_image;
 var gr;
 var caaaa;
 var input_image_tex;
+
+var colors_current = 0.0;
+var colors_target = 0.0;
 
 let courierM;
 
@@ -161,10 +165,9 @@ function initialParticleData(num_parts, min_age, max_age) {
     data.push(Math.random()*0 + 1000);
 
     // seed
-    var popacity = 0.16;
-    if(num_parts < 500000)
-      popacity = 0.16 + (0.7-0.16)*(1. - (num_parts-50000)/(500000-50000));
-    data.push(popacity);
+    // // opacity
+    data.push(Math.random());
+    // // drag
     data.push(Math.random());
     
     // vel
@@ -362,6 +365,11 @@ var vao_desc = [
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
+    
+  var particle_opacity = 0.16;
+  if(num_particles < 500000)
+    particle_opacity = 0.16 + (0.7-0.16)*(1. - (num_particles-50000)/(500000-50000));
+
   return {
     particle_sys_buffers: buffers,
     particle_sys_vaos: vaos,
@@ -382,14 +390,13 @@ var vao_desc = [
     min_speed: min_speed,
     max_speed: max_speed,
     input_image: input_image_tex,
+    particle_opacity: particle_opacity,
   };
 }
 
 function render(gl, state, timestamp_millis) {
-  
   input_image.src = myp5._renderer.canvas.toDataURL("image/png");
   //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
-  //console.log(myp5._renderer.canvas.toDataURL("image/png"));
   input_image.onload = function (){
     gl.bindTexture(gl.TEXTURE_2D, input_image_tex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, input_image);
@@ -468,7 +475,8 @@ function render(gl, state, timestamp_millis) {
   gl.viewport(0, 0,
     gl.drawingBufferWidth, gl.drawingBufferHeight);
   // Set the clear color to darkish green.
-  gl.clearColor(0.64, 0.64, 0.64, 1.0);
+  var br = .64 - .5*colors_current;
+  gl.clearColor(br, br, br, 1.0);
   // Clear the context with the newly set color. This is
   // the function call that actually does the drawing.
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -485,6 +493,12 @@ function render(gl, state, timestamp_millis) {
   gl.uniform1i(
     gl.getUniformLocation(state.particle_update_program, "u_InputImage"),
   0);
+  gl.uniform1f(
+    gl.getUniformLocation(state.particle_render_program, "u_Colors"),
+    colors_current);
+    gl.uniform1f(
+      gl.getUniformLocation(state.particle_render_program, "u_Opacity"),
+      state.particle_opacity);
 
   gl.drawArrays(gl.POINTS, 0, num_part);
   var tmp = state.read;
@@ -498,11 +512,12 @@ function render(gl, state, timestamp_millis) {
     
     state = resetState();
   }
-  if(speed_prev != particles_info["speed"]){
-    speed_prev = particles_info["speed"];
+  if(speed_prev != particles_info.speed){
+    speed_prev = particles_info.speed;
   }
   window.requestAnimationFrame(function(ts) { render(gl, state, ts); });
 
+  colors_current = colors_current + (colors_target - colors_current)*.12;
 }
 
 function reportWindowSize() {
@@ -538,7 +553,6 @@ function repositionCanvas(canvas){
       canvas.height = Math.min(ww, hh) - 130;
     }
 
-    console.log("canvas");
     canvas.style.position = 'absolute';
     canvas.style.left = ww/2 - canvas.width/2 + 'px';
     canvas.style.top = hh/2 - canvas.height/2 + 'px';
@@ -619,7 +633,6 @@ function displayMessage(){
   message.style.left = ww/2 - l1.offsetWidth/2 + 'px';
   message.style.top = hh/2 - ww*0.8*.73 + 'px';
 
-  console.log(ww/2, l1.offsetWidth);
 }
 
 function main() {
@@ -677,10 +690,13 @@ function main() {
       }
       //strr = strr.slice(0, 8);
       txtinput_field.setValue(strr);
-      console.log("x",rstrr);
       myp5.reset(rstrr);
+      });
+      gui.add(particles_info, 'colors').onFinishChange(function (value) {
+        colors_target = value * 1.0;
+        console.log(colors_target);
     });
-    console.log(txtinput_field);
+
 
     repositionGui();
     webgl_context = canvas.getContext("webgl2");
@@ -688,10 +704,8 @@ function main() {
       document.body.prepend(canvas);
         input_image = new Image();
         //input_image.src = './assets/grafit.png';
-        console.log("b", myp5._setupDone);
         
         input_image.src = myp5._renderer.canvas.toDataURL("image/png");
-        //console.log(myp5._renderer.canvas.toDataURL("image/png"));
         input_image_tex = webgl_context.createTexture()
         input_image.onload = function (){
           var state = resetState();
