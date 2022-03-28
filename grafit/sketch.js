@@ -61,6 +61,9 @@ let mysketch = function(p) {
   };
 };
 
+var time0 = 0;
+var time1 = 0;
+
 let myp5 = new p5(mysketch);
 
 function isMobile() {
@@ -396,8 +399,13 @@ var vao_desc = [
   };
 }
 
+var count=1;
 function render(gl, state, timestamp_millis) {
+  //if(count%120==0){
+  //  console.log(Math.round(1.*count/(performance.now()-time0)*1000.));
+  //}
   input_image.src = myp5._renderer.canvas.toDataURL("image/png");
+  count++;
   //input_image.src = './assets/fingerprint.png';
   //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
   input_image.onload = function (){
@@ -563,6 +571,8 @@ function repositionCanvas(canvas){
 }
 
 function resetState(){
+  
+  //time0 = performance.now();
   document.onmousemove = function(e) {
     var x = e.pageX - canvas.offsetLeft;
     var y = e.pageY - canvas.offsetTop;
