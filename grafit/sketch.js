@@ -44,7 +44,7 @@ let mysketch = function(p) {
       p.textFont(thefont);
       //p.textFont(p.courierM);
       p.textAlign(p.CENTER, p.CENTER);
-      p.text(txtinput, p.width/2, p.height/2);
+      p.text(txtinput, p.width/2, p.height/2-5);
   }
   }
 
@@ -56,6 +56,8 @@ let mysketch = function(p) {
   };
 
   p.draw = function() {
+    //if(p.mouseIsPressed)
+      //p.ellipse(p.mouseX, p.mouseY, 14, 14);
   };
 };
 
@@ -396,6 +398,7 @@ var vao_desc = [
 
 function render(gl, state, timestamp_millis) {
   input_image.src = myp5._renderer.canvas.toDataURL("image/png");
+  //input_image.src = './assets/fingerprint.png';
   //caaaa.src = myp5._renderer.canvas.toDataURL("image/png");
   input_image.onload = function (){
     gl.bindTexture(gl.TEXTURE_2D, input_image_tex);
@@ -581,18 +584,17 @@ function resetState(){
     }
   };
 
-
-    var state =
-    init(
-      webgl_context,
-      count_prev, /* number of particles */
-      0.5, /* birth rate */
-      1.01, 1.15, /* life range */
-      Math.PI/2.0 - 0.5, Math.PI/2.0 + 0.5, /* direction range */
-      0.5, 1.0, /* speed range */
-      [0.0, -0.8]
-    ); /* gravity */
-    return state;
+  var state =
+  init(
+    webgl_context,
+    count_prev, /* number of particles */
+    0.5, /* birth rate */
+    1.01, 1.15, /* life range */
+    Math.PI/2.0 - 0.5, Math.PI/2.0 + 0.5, /* direction range */
+    0.5, 1.0, /* speed range */
+    [0.0, -0.8]
+  ); /* gravity */
+  return state;
 }
 
 function preventBehavior(e) {
@@ -703,9 +705,9 @@ function main() {
     if (webgl_context != null) {
       document.body.prepend(canvas);
         input_image = new Image();
-        //input_image.src = './assets/grafit.png';
-        
         input_image.src = myp5._renderer.canvas.toDataURL("image/png");
+        //input_image.src = './assets/fingerprint.png';
+        
         input_image_tex = webgl_context.createTexture()
         input_image.onload = function (){
           var state = resetState();

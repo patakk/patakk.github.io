@@ -23,6 +23,9 @@ canvas {
 }
 
 #defaultCanvas0 {
+    position: absolute;
+    top: 200px;
+    left: 30px;
     display: none;
 }
 

@@ -1,5 +1,5 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 in float v_Age;
 in vec2 v_Seed;

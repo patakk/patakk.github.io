@@ -1,5 +1,5 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 uniform vec2 u_Resolution;
 uniform float u_Opacity;
@@ -28,6 +28,7 @@ void main() {
   tc.y = 1. - tc.y;
 	float texcol = 1. - texture(u_InputImage, tc).r;
   //gl_PointSize = 3.*texcol;
+
   gl_PointSize = ps;
   gl_Position = vec4(pos, 0.0, 1.0);
 }
