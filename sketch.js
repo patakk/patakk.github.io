@@ -17,7 +17,7 @@ function fxrandom(a, b){
     return a + (b - a)*fxrand();
 }
 
-var scrollscale = 1.;
+var scrollscale = 1.3;
 var globalIndex = 0;
 var frameCount = 0;
 var particlePositions = [];
@@ -141,9 +141,11 @@ function radians(angle){
 }
 
 function reset(){
+	
     var ns = fxrandom(0, 100000);
     noiseSeed(ns);
     globalIndex = 0;
+    scrollscale = 1.3;
     frameCount = 0;
     offcl = [fxrandom(-42, 42), fxrandom(-27, 21), fxrandom(-27, 27)]
     offcl = [0,0,0]
@@ -239,8 +241,8 @@ function reset(){
 
     generateBackground();
     generateForeground();
-    generateForeground();
-    generateTrees();
+    //generateForeground();
+    //generateTrees();
 
     
     loadShadersAndData();
@@ -654,7 +656,7 @@ function generateForeground(){
     //);
     //pg.noStroke();
     //pg.rect(baseWidth/2, baseHeight*(1+horizon*1.1)/2, baseWidth, baseHeight*(1-horizon));
-    offcl1 = [fxrandom(-5, 34), fxrandom(-5, 34), fxrandom(-34, 14)]
+    offcl1 = [fxrandom(-33, 34), fxrandom(-5, 34), fxrandom(-34, 14)]
     offcl2 = [fxrandom(-14, 14), fxrandom(-14, 14), fxrandom(-14, 14)]
     var rr1 = fxrandom(0.25, 0.5); // .4155
     var rr2 = fxrandom(rr1, rr1+0.35) // .565
