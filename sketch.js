@@ -557,7 +557,7 @@ function generateBackground(){
     hsv = [fxrand(), fxrandom(0.2, 0.66), fxrandom(0.3, 0.95)]
     rgb = HSVtoRGB(hsv[0], hsv[1], hsv[2])
 
-    for(var k = 0; k < 320000; k++){
+    for(var k = 0; k < 220000; k++){
         var x = fxrandom(0, baseWidth);
         var y = fxrandom(0, getHorizon(x)) + fxrandom(-5, 5);
         var pos, col, size, angle;
@@ -642,7 +642,7 @@ function generateForeground(){
     var rr2 = fxrandom(rr1, rr1+0.35) // .565
     var dispr = fxrandom(0.03, 0.09)
 
-    for(var k = 0; k < 60000; k++){
+    for(var k = 0; k < 90000; k++){
         var x = fxrandom(0, baseWidth);
         var y = fxrandom(getHorizon(x), baseHeight*1.0);
 
