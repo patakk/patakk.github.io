@@ -24,7 +24,7 @@ var particleSizes = [];
 var particleAngles = [];
 var particleIndices = [];
 
-var horizon = fxrandom(0.3, 0.8);
+var horizon = fxrandom(0.7, 0.93);
 
 var offcl = [fxrandom(-42, 14), fxrandom(-37, 34), fxrandom(-37, 37)]
 skyclr = {
@@ -112,7 +112,7 @@ function draw(){
 
 function getHorizon(x){
     var dispr = .5*baseHeight*(-.5*power(noise(x*0.003+3133.41), 3))
-    return baseHeight*horizon + .8*baseHeight*(-.5*power(noise(x*0.003), 2)) + dispr*fxrand();
+    return baseHeight*horizon + (1. - horizon*.8)*.6*baseHeight*(-.5*power(noise(x*0.003), 2)) + .3*dispr*fxrand();
 }
 
 function map(x, v1, v2, v3, v4){
@@ -145,7 +145,7 @@ function reset(){
     frameCount = 0;
     offcl = [fxrandom(-14*3, 14), fxrandom(-7, 4), fxrandom(-7, 7)]
     seed = fxrand()*10000;
-    horizon = fxrandom(0.7, 0.8);
+    horizon = fxrandom(0.24, 0.93);
 
     wind = fxrandom(-.4, +.4);
     if(fxrand() < .5)
@@ -493,7 +493,7 @@ function generateTrees(){
         //if(fxrand() > prob)
         //    continue;
         var x = map(middle, 0, 1, baseWidth*.0, baseWidth-baseWidth*.0);
-        var y = map(pp, 0, 1, getHorizon(x)*1.1, baseHeight) + 0*fxrandom(0, baseHeight/30);
+        var y = map(pp, 0, 1, getHorizon(x)*1, baseHeight) + 0*fxrandom(0, baseHeight/30);
         drawTree(x, y, kk, pp);
         kk++;
 
@@ -557,7 +557,7 @@ function generateBackground(){
     hsv = [fxrand(), fxrandom(0.2, 0.66), fxrandom(0.3, 0.95)]
     rgb = HSVtoRGB(hsv[0], hsv[1], hsv[2])
 
-    for(var k = 0; k < 220000; k++){
+    for(var k = 0; k < 320000; k++){
         var x = fxrandom(0, baseWidth);
         var y = fxrandom(0, getHorizon(x)) + fxrandom(-5, 5);
         var pos, col, size, angle;
@@ -642,7 +642,7 @@ function generateForeground(){
     var rr2 = fxrandom(rr1, rr1+0.35) // .565
     var dispr = fxrandom(0.03, 0.09)
 
-    for(var k = 0; k < 160000; k++){
+    for(var k = 0; k < 60000; k++){
         var x = fxrandom(0, baseWidth);
         var y = fxrandom(getHorizon(x), baseHeight*1.0);
 
