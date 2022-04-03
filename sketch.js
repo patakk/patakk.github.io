@@ -566,7 +566,7 @@ function generateBackground(){
     hsv = [fxrand(), fxrandom(0.2, 0.66), fxrandom(0.3, 0.95)]
     rgb = HSVtoRGB(hsv[0], hsv[1], hsv[2])
 
-    offcl1 = [fxrandom(-3, 33), fxrandom(-33, 33), fxrandom(-5, 5)]
+    offcl1 = [fxrandom(-3, 33), fxrandom(-33, 33), fxrandom(-33, 5)]
     offcl2 = [fxrandom(-3, 33), fxrandom(-33, 33), fxrandom(-33, 5)]
     for(var k = 0; k < 230000*horizon; k++){
         var x = fxrandom(0, baseWidth);
