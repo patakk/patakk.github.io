@@ -3,7 +3,7 @@ var vShader, fShader;
 var loaded = false;
 
 var points;
-var ress = 900;
+var ress = 1000;
 var baseWidth = 1;
 var baseHeight = 1;
 var winScale;
