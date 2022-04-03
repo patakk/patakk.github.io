@@ -2,7 +2,7 @@ let camera, scene, renderer;
 var vShader, fShader;
 
 var points;
-var ress = 800;
+var ress = 900;
 var baseWidth = 1;
 var baseHeight = 1;
 var winScale;
@@ -52,7 +52,7 @@ treeclr = {
 groundclr = {
     c: [166, 134, 69, 255],
     cd: [49, 25, 22, 0],
-    b: [88, 77, 123, 188],
+    b: [88, 77, 99, 188],
     bd: [11, 28, 17, 55],
     a: [200, 125, 62, 255],
     ad: [44, 25, 22, 0],
@@ -93,12 +93,14 @@ function dist(x1, y1, x2, y2){
 
 function animate() {
     
-    requestAnimationFrame(animate);
-    
+    //requestAnimationFrame(animate);
     if(renderer){
         points.material.uniforms.u_time.value = frameCount++;
         points.material.uniforms.u_scrollscale.value = scrollscale;
         renderer.render(scene, camera);
+    }
+    else{
+        requestAnimationFrame(animate);
     }
 }
 
@@ -159,18 +161,13 @@ function reset(){
     baseWidth = ress-16;
     baseHeight = ress-16;
 
-    if(ww < hh){
-        canvasWidth = ww;
-        canvasHeight = hh;
-        baseWidth = ww-16;
-        baseHeight = hh-16;
-    }
 
-    if(ww < 800 || hh < 800){
-        canvasWidth = ww;
-        canvasHeight = hh;
-        baseWidth = ww-16;
-        baseHeight = hh-16;
+    if(ww < ress || hh < ress){
+        mm = min(ww, hh);
+        canvasWidth = mm-50;
+        canvasHeight = mm-50;
+        baseWidth = mm-50-16;
+        baseHeight = mm-50-16;
     }
 
     ww = canvasWidth
@@ -338,8 +335,8 @@ function loadData(){
 
     repositionCanvas(renderer.domElement);
 
-    if(canvasWidth < canvasHeight || canvasWidth < 800 || canvasHeight < 800)
-      renderer.domElement.style.borderWidth = "0px";
+    if(canvasWidth < canvasHeight || canvasWidth < ress || canvasHeight < ress)
+      renderer.domElement.style.borderWidth = "6px";
     else
         renderer.domElement.style.borderWidth = "6px";
     //renderer.render( scene, camera );
@@ -358,7 +355,7 @@ function repositionCanvas(canvas){
     if(isMobile()){
       //canvas.width = ww;
       //canvas.height = hh;
-      //canvas.style.borderWidth = "0px";
+      //canvas.style.borderWidth = "6px";
     }
     else{
       //canvas.width = Math.min(ww, hh) - 130;
@@ -382,7 +379,7 @@ function onWindowResize() {
 
     renderer.domElement.style.borderWidth = "6px";
     if(canvasWidth < canvasHeight)
-      renderer.domElement.style.borderWidth = "0px";
+      renderer.domElement.style.borderWidth = "6px";
 }
 
 var cnt = 0
@@ -726,7 +723,7 @@ function generateForeground(){
 function windowResized() {
     renderer.domElement.style.borderWidth = "6px";
     if(canvasWidth < canvasHeight)
-      renderer.domElement.style.borderWidth = "0px";
+      renderer.domElement.style.borderWidth = "6px";
 
     reset();
 }  
