@@ -1,5 +1,6 @@
 let camera, scene, renderer;
 var vShader, fShader;
+var loaded = false;
 
 var points;
 var ress = 900;
@@ -91,7 +92,7 @@ function dist(x1, y1, x2, y2){
     return Math.sqrt((x2-x1)**2, (y2-y1)**2);
 }
 
-function animate() {
+/*function animate() {
     
     //requestAnimationFrame(animate);
     if(renderer){
@@ -102,7 +103,7 @@ function animate() {
     else{
         requestAnimationFrame(animate);
     }
-}
+}*/
 
 
 
@@ -140,7 +141,8 @@ function radians(angle){
 }
 
 function reset(){
-    noiseSeed(fxrandom(0, 100000));
+    var ns = fxrandom(0, 100000);
+    noiseSeed(ns);
     globalIndex = 0;
     frameCount = 0;
     offcl = [fxrandom(-42, 42), fxrandom(-27, 21), fxrandom(-27, 27)]
@@ -238,10 +240,10 @@ function reset(){
     generateBackground();
     generateForeground();
     generateTrees();
-
+    
     loadShadersAndData();
 
-    animate();
+    
 
 }
 
@@ -280,7 +282,8 @@ function loadData(){
     var ff = true;
     if(scene)
       ff = false;
-    scene = new THREE.Scene();
+    else
+        scene = new THREE.Scene();
     hsv = [Math.pow(fxrand()*.5, 2), fxrandom(0.2, 0.66), fxrandom(0.35, 0.55)]
     bgcolor = HSVtoRGB(hsv[0], hsv[1], hsv[2])
 
@@ -339,6 +342,12 @@ function loadData(){
       renderer.domElement.style.borderWidth = "6px";
     else
         renderer.domElement.style.borderWidth = "6px";
+
+
+    points.material.uniforms.u_time.value = frameCount++;
+    points.material.uniforms.u_scrollscale.value = scrollscale;
+
+    renderer.render(scene, camera);
     //renderer.render( scene, camera );
 
     //window.addEventListener( 'resize', onWindowResize );
@@ -450,7 +459,6 @@ function drawTree(rx, ry, kk, pp){
                 //mySquare(0, 0, 6.5*fxrandom(.8, 1.2)*perspective, 4*fxrandom(.9, 1.1)*perspective);
             }
             //cnt++;
-            
             if(pos[0] < 0 || pos[0] > baseWidth)
                 continue
             if(pos[1] < 0 || pos[1] > baseHeight)
