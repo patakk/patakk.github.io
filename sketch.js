@@ -280,10 +280,7 @@ function loadData(){
     //camera.position.z = 2750;
 
     var ff = true;
-    if(scene)
-      ff = false;
-    else
-        scene = new THREE.Scene();
+    scene = new THREE.Scene();
     hsv = [Math.pow(fxrand()*.5, 2), fxrandom(0.2, 0.66), fxrandom(0.35, 0.55)]
     bgcolor = HSVtoRGB(hsv[0], hsv[1], hsv[2])
 
@@ -301,6 +298,7 @@ function loadData(){
 
     const geometry = new THREE.BufferGeometry();
 
+    console.log(particlePositions.length)
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( particlePositions, 3 ) );
     geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( particleColors, 4 ) );
     geometry.setAttribute( 'size', new THREE.Float32BufferAttribute( particleSizes, 2 ) );
@@ -358,8 +356,8 @@ function repositionCanvas(canvas){
     var win = window,
     doc = document,
     body = doc.getElementsByTagName('body')[0],
-    ww = win.innerWidth || canvas.clientWidth || body.clientWidth,
-    hh = win.innerHeight|| canvas.clientHeight|| body.clientHeight;
+    ww = win.innerWidth,
+    hh = win.innerHeight;
     
     if(isMobile()){
       //canvas.width = ww;
@@ -371,15 +369,17 @@ function repositionCanvas(canvas){
       //canvas.height = Math.min(ww, hh) - 130;
     }
 
+        console.log(ww, hh)
+        console.log(canvasWidth, canvasHeight)
     canvas.style.position = 'absolute';
-    canvas.style.left = ww/2 - canvasWidth/2 + 'px';
-    canvas.style.top = hh/2 - canvasHeight/2 + 'px';
+    canvas.style.left = (ww - canvasWidth)/2 - 6 + 'px';
+    canvas.style.top = (hh - canvasHeight)/2 - 6 + 'px'; // ovih 6 je border
     
 }
 
 function onWindowResize() {
-    ww = win.innerWidth || canvas.clientWidth || body.clientWidth,
-    hh = win.innerHeight|| canvas.clientHeight|| body.clientHeight;
+    ww = win.innerWidth;
+    hh = win.innerHeight;
 
     camera.aspect = canvasWidth / canvasHeight;
     camera.updateProjectionMatrix();
