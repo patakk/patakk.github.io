@@ -1,3 +1,4 @@
+
 let camera, scene, renderer;
 var vShader, fShader;
 var loaded = false;
@@ -166,7 +167,7 @@ function reset(){
     baseHeight = ress-16;
 
 
-    if(ww < ress || hh < ress){
+    if(ww < ress-16 || hh < ress-16){
         mm = min(ww, hh);
         canvasWidth = mm-50;
         canvasHeight = mm-50;
@@ -350,8 +351,8 @@ function loadData(){
     points.material.uniforms.u_time.value = frameCount++;
     points.material.uniforms.u_scrollscale.value = scrollscale;
 
-    renderer.render(scene, camera);
-    //renderer.render( scene, camera );
+    //composer.render();
+    renderer.render( scene, camera );
 
     //window.addEventListener( 'resize', onWindowResize );
 }
@@ -767,4 +768,3 @@ paletteImg.onload = function () {
     paletteCanvas.getContext('2d').drawImage(paletteImg, 0, 0, paletteImg.width, paletteImg.height);
     reset();
 }
-
